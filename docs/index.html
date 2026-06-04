@@ -3,279 +3,624 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>lab.devi.tools — como funciona</title>
+<title>lab.devi.tools — URL pública pro seu projeto local</title>
+<meta name="description" content="Túnel reverso e publicação estática caseira pra *.devi.tools. Sem SSH, sem ngrok, sem configuração.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #faf9f6;
-    --ink: #1a1a1a;
-    --muted: #6b6b6b;
-    --card: #fff;
-    --line: #e6e3dc;
-    --accent: #d97706;
-    --accent-soft: #fef3c7;
-    --good: #15803d;
-    --warn: #b45309;
-    --bad: #b91c1c;
+    --bg: #0a0a14;
+    --bg-deep: #050510;
+    --surface: #11131f;
+    --surface-2: #161827;
+    --line: rgba(255,255,255,0.06);
+    --line-strong: rgba(255,255,255,0.12);
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --muted-2: #6b7280;
+    --purple: #a855f7;
+    --indigo: #6366f1;
+    --orange: #fb923c;
+    --amber: #f59e0b;
+    --cyan: #22d3ee;
+    --teal: #14b8a6;
+    --pink: #ec4899;
+    --good: #34d399;
+    --bad: #f87171;
+    --warn: #fbbf24;
   }
   * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
     margin: 0;
-    padding: 32px 20px 80px;
     line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(168, 85, 247, 0.15), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 30%, rgba(99, 102, 241, 0.08), transparent 60%),
+      var(--bg);
+    background-attachment: fixed;
   }
-  .wrap { max-width: 760px; margin: 0 auto; }
-  header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 8px;
+  code, pre, .mono {
+    font-family: 'JetBrains Mono', "SF Mono", Menlo, Consolas, monospace;
   }
-  h1 {
-    font-size: 32px;
-    margin: 0;
-    letter-spacing: -0.5px;
+  a { color: var(--text); text-decoration: none; }
+  a:hover { color: var(--purple); }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  .narrow { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+  header.site {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10, 10, 20, 0.7);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--line);
   }
-  .sun {
-    font-size: 28px;
-    line-height: 1;
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0;
   }
-  .sub {
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700;
+  }
+  .brand .glyph {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--purple), var(--indigo));
+    border-radius: 8px;
+    color: white; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-size: 14px;
+  }
+  .brand .name {
+    display: flex; flex-direction: column; line-height: 1;
+  }
+  .brand .name .top { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+  .brand .name .bot { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+  .nav-links { display: none; gap: 28px; }
+  @media (min-width: 880px) { .nav-links { display: flex; } }
+  .nav-links a {
+    color: var(--muted); font-size: 14px; font-weight: 500;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
     color: var(--muted);
-    margin: 0 0 36px;
-    font-size: 17px;
+    transition: background 0.15s, color 0.15s;
   }
-  h2 {
-    font-size: 22px;
-    margin: 40px 0 12px;
-    letter-spacing: -0.3px;
-  }
-  p { margin: 0 0 14px; }
-  pre {
-    background: var(--card);
-    border: 1px solid var(--line);
+  .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px; font-weight: 600;
     border-radius: 10px;
-    padding: 20px;
-    overflow-x: auto;
-    font-family: "SF Mono", Menlo, Consolas, monospace;
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: #333;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    white-space: nowrap;
   }
-  .diagram pre {
-    font-size: 11.5px;
-    padding: 24px 16px;
+  .btn svg { width: 16px; height: 16px; }
+  .btn-primary {
+    background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 8px 24px -8px rgba(168, 85, 247, 0.5);
   }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px -8px rgba(168, 85, 247, 0.7); color: white; }
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--line-strong);
+  }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+  .btn-lg { padding: 14px 24px; font-size: 15px; border-radius: 12px; }
+
+  .hero { padding: 96px 0 80px; text-align: center; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    background: rgba(168, 85, 247, 0.08);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 999px;
+    color: #e9d5ff;
+    font-size: 13px; font-weight: 500;
+    margin-bottom: 32px;
+  }
+  .pill .spark { color: var(--purple); }
+  h1.hero-title {
+    font-size: clamp(40px, 7vw, 80px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin: 0 0 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #c4c4d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--muted);
+    max-width: 580px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+  .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .platform-hint {
+    color: var(--muted-2); font-size: 13px; margin-top: 12px;
+  }
+
+  section { padding: 80px 0; }
+  section.tight { padding: 56px 0; }
+  .section-eyebrow {
+    text-align: center;
+    color: var(--purple);
+    font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h2.section-title {
+    text-align: center;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 0 0 20px;
+  }
+  .section-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 620px;
+    margin: 0 auto 48px;
+  }
+
+  .features-row {
+    display: grid; grid-template-columns: 1fr; gap: 24px;
+    max-width: 920px; margin: 0 auto;
+  }
+  @media (min-width: 720px) {
+    .features-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  .feat {
+    text-align: center;
+    padding: 8px;
+  }
+  .feat-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    color: white;
+  }
+  .feat-icon svg { width: 24px; height: 24px; }
+  .feat-icon.purple { background: linear-gradient(135deg, #c084fc, #7c3aed); box-shadow: 0 8px 20px -8px rgba(168, 85, 247, 0.5); }
+  .feat-icon.orange { background: linear-gradient(135deg, #fdba74, #ea580c); box-shadow: 0 8px 20px -8px rgba(251, 146, 60, 0.5); }
+  .feat-icon.pink   { background: linear-gradient(135deg, #f9a8d4, #db2777); box-shadow: 0 8px 20px -8px rgba(236, 72, 153, 0.5); }
+  .feat h3 {
+    font-size: 18px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.2px;
+  }
+  .feat p {
+    color: var(--muted); margin: 0; font-size: 14.5px; line-height: 1.5;
+  }
+
   .modes {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin: 20px 0 24px;
+    display: grid; grid-template-columns: 1fr; gap: 24px;
+    max-width: 1000px; margin: 0 auto;
   }
-  @media (min-width: 640px) {
+  @media (min-width: 800px) {
     .modes { grid-template-columns: 1fr 1fr; }
   }
-  .card {
-    background: var(--card);
+  .mode-card {
+    position: relative;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .mode-card:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+  .mode-card .mode-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    color: white;
+  }
+  .mode-card .mode-icon svg { width: 22px; height: 22px; }
+  .mode-card.publish .mode-icon { background: linear-gradient(135deg, #60a5fa, #2563eb); box-shadow: 0 8px 20px -8px rgba(96, 165, 250, 0.5); }
+  .mode-card.tunnel .mode-icon  { background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 8px 20px -8px rgba(251, 191, 36, 0.5); }
+  .mode-card h3 {
+    font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.4px;
+  }
+  .mode-card .mode-tag {
+    color: var(--muted); font-size: 13px; margin: 0 0 20px;
+  }
+  .mode-card ol {
+    margin: 0 0 20px; padding-left: 22px;
+    font-size: 14.5px; color: #d1d5db;
+  }
+  .mode-card ol li { margin-bottom: 8px; }
+  .mode-card ol li ul { margin-top: 6px; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+  .mode-card ol li ul li { margin-bottom: 4px; }
+  .mode-card .card-footer {
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  .mode-card .card-footer strong { color: var(--text); font-weight: 600; }
+
+  code {
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.18);
+    color: #e9d5ff;
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 20px 22px;
-  }
-  .card h3 {
-    margin: 0 0 10px;
-    font-size: 17px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card ol {
-    margin: 0;
-    padding-left: 22px;
-    font-size: 15px;
-  }
-  .card ol li { margin-bottom: 4px; }
-  .card .when {
-    margin-top: 12px;
-    font-size: 13.5px;
-    color: var(--muted);
-    border-top: 1px dashed var(--line);
-    padding-top: 10px;
-  }
-  code {
-    background: var(--accent-soft);
-    padding: 1.5px 6px;
-    border-radius: 4px;
-    font-family: "SF Mono", Menlo, Consolas, monospace;
-    font-size: 13.5px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #d1d5db;
+    margin: 16px 0;
   }
   pre code {
-    background: none;
-    padding: 0;
-    font-size: inherit;
+    background: none; border: none; padding: 0; color: inherit; font-size: inherit;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 8px 0 16px;
+
+  .comparison-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 8px;
+    overflow: hidden;
+    max-width: 800px; margin: 0 auto;
+  }
+  table.cmp {
+    width: 100%; border-collapse: collapse;
     font-size: 14.5px;
   }
-  th, td {
-    padding: 10px 12px;
+  .cmp th, .cmp td {
+    padding: 14px 18px;
     text-align: left;
+  }
+  .cmp thead th {
+    color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
     border-bottom: 1px solid var(--line);
   }
-  th { font-weight: 600; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; }
-  td.yes { color: var(--good); font-weight: 500; }
-  td.no  { color: var(--bad);  font-weight: 500; }
-  td.mid { color: var(--warn); font-weight: 500; }
+  .cmp tbody tr { border-bottom: 1px solid var(--line); }
+  .cmp tbody tr:last-child { border-bottom: none; }
+  .cmp td.label { color: #d1d5db; }
+  .cmp td.yes { color: var(--good); font-weight: 600; }
+  .cmp td.no  { color: var(--bad);  font-weight: 600; }
+  .cmp td.mid { color: var(--warn); font-weight: 600; }
+  .cmp td.yes::before { content: "✓ "; }
+  .cmp td.no::before  { content: "✗ "; }
+  .cmp td.mid::before { content: "△ "; }
+
   .pitfall {
-    background: var(--accent-soft);
-    border-left: 3px solid var(--accent);
-    padding: 14px 18px;
-    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.08), rgba(251, 146, 60, 0.02));
+    border: 1px solid rgba(251, 146, 60, 0.2);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
     margin: 16px 0;
     font-size: 14.5px;
+    color: #fde68a;
   }
-  .pitfall strong { color: var(--accent); }
-  footer {
-    margin-top: 56px;
-    padding-top: 20px;
+  .pitfall strong { color: #fed7aa; }
+  .pitfalls-list { max-width: 800px; margin: 0 auto; }
+  .pitfalls-list p { color: var(--muted); font-size: 14px; margin: 12px 0; }
+
+  .diagram-wrap {
+    max-width: 880px; margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 8px;
+    overflow-x: auto;
+  }
+  .diagram-wrap pre {
+    border: none; background: transparent; margin: 0;
+    font-size: 11.5px; line-height: 1.5;
+    color: #a5b4fc;
+  }
+
+  .url-block {
+    max-width: 620px; margin: 0 auto;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(99, 102, 241, 0.04));
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 12px;
+    padding: 22px 28px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    color: #e9d5ff;
+  }
+  .url-block .scheme { color: var(--muted); }
+  .url-block .slug { color: var(--purple); font-weight: 600; }
+  .url-block .dom { color: #d1d5db; }
+  .url-caption {
+    text-align: center; color: var(--muted-2); font-size: 13.5px;
+    max-width: 580px; margin: 18px auto 0;
+  }
+
+  footer.site {
+    background: var(--bg-deep);
     border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 13.5px;
+    padding: 56px 0 32px;
+    margin-top: 80px;
   }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+  @media (min-width: 720px) {
+    .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+  }
+  .footer-brand p {
+    color: var(--muted); font-size: 14px; margin: 14px 0 0; max-width: 280px;
+  }
+  .footer-col h4 {
+    font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; margin: 0 0 16px;
+  }
+  .footer-col a {
+    display: block; color: #d1d5db; font-size: 14px; padding: 4px 0;
+  }
+  .footer-col a:hover { color: var(--purple); }
+  .footer-bot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--muted-2); font-size: 13px; flex-wrap: wrap; gap: 12px;
+  }
+  .footer-bot a { color: var(--muted); font-size: 13px; }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header>
-    <span class="sun">🌞</span>
-    <h1>lab.devi.tools</h1>
-  </header>
-  <p class="sub">URL pública pro seu projeto local em 1 clique.</p>
-
-  <p>
-    O <strong>lab.exe</strong> é um appzinho que roda no seu Windows e
-    transforma um projeto que tá só na sua máquina numa URL que qualquer
-    amigo pode abrir no navegador, com HTTPS e tudo. Dois jeitos de usar:
-  </p>
-
-  <div style="margin: 24px 0 32px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-    <a href="https://github.com/devitools/lab/releases/download/latest/lab.exe"
-       style="display: inline-block; background: var(--accent); color: white;
-              padding: 12px 20px; border-radius: 8px; font-weight: 600;
-              text-decoration: none;">
-      ⬇ Windows&nbsp;·&nbsp;lab.exe
+<header class="site">
+  <div class="wrap nav">
+    <a href="/" class="brand">
+      <span class="glyph">&lt;/&gt;</span>
+      <span class="name">
+        <span class="top">lab</span>
+        <span class="bot">devi tools</span>
+      </span>
     </a>
-    <a href="https://github.com/devitools/lab/releases/download/latest/lab-macos.zip"
-       style="display: inline-block; background: var(--ink); color: white;
-              padding: 12px 20px; border-radius: 8px; font-weight: 600;
-              text-decoration: none;">
-      ⬇ macOS&nbsp;·&nbsp;lab.app
-    </a>
-    <span style="color: var(--muted); font-size: 13px; flex-basis: 100%;">
-      Windows: single-file, dois cliques.
-      macOS (Apple Silicon): descompactar e mover pra Aplicativos. Na 1ª
-      abertura, click-direito no <code>lab.app</code> → Abrir
-      (Gatekeeper bloqueia apps não assinados).
+    <nav class="nav-links">
+      <a href="#como-usar">Como usar</a>
+      <a href="#qual-modo">Qual modo</a>
+      <a href="#pegadinhas">Pegadinhas</a>
+      <a href="#download">Download</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="https://github.com/devitools/lab" class="icon-btn" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.8 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.6 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.5-1.5 7.8-5.8 7.8-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+      </a>
+      <a href="#download" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="white"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+        Baixar
+      </a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="narrow">
+    <span class="pill">
+      <span class="spark">✦</span>
+      Túnel reverso pra projetos locais
     </span>
+    <h1 class="hero-title">URL pública pro seu projeto local em 1 clique</h1>
+    <p class="hero-sub">
+      Abra o <strong style="color: var(--text);">lab</strong> no seu computador, aponte uma pasta
+      ou uma porta, e receba um link HTTPS pra mandar pro amigo. Sem SSH, sem ngrok, sem cadastro.
+    </p>
+    <div class="hero-cta" id="download">
+      <a href="https://github.com/devitools/lab/releases/download/latest/lab.exe" class="btn btn-primary btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+        Windows · lab.exe
+      </a>
+      <a href="https://github.com/devitools/lab/releases/download/latest/lab-macos.zip" class="btn btn-ghost btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+        macOS · lab.app
+      </a>
+    </div>
+    <p class="platform-hint">
+      Single-file ~15MB. Apple Silicon. Sem dependência externa.
+    </p>
   </div>
+</section>
 
-  <h2>Como usar</h2>
-
-  <div class="modes">
-    <div class="card">
-      <h3>📤 Publicar pasta</h3>
-      <ol>
-        <li>Abrir o lab</li>
-        <li>Escolher a pasta do projeto (com <code>index.html</code> dentro)</li>
-        <li>Clicar <strong>Publicar</strong></li>
-        <li>Copiar a URL e mandar pro amigo</li>
-      </ol>
-      <div class="when">
-        Funciona <strong>pra sempre</strong> (até apagar) — seu
-        computador pode tá desligado que continua no ar.
+<section class="tight">
+  <div class="wrap">
+    <div class="features-row">
+      <div class="feat">
+        <div class="feat-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <h3>Dois cliques</h3>
+        <p>Sem terminal, sem chave SSH, sem token de cadastro. Abriu, escolheu, clicou.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>HTTPS automático</h3>
+        <p>Wildcard <code>*.devi.tools</code> com certificado renovado sozinho. URL pronta pra mandar.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon pink">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3>Open source</h3>
+        <p>Cliente Python, servidor Go, tudo no GitHub. Sem rastreamento, sem analytics, sem firula.</p>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="card">
-      <h3>🔌 Conectar porta</h3>
-      <ol>
-        <li>Rodar um servidor local na sua pasta. Três opções:
-          <ul style="margin: 4px 0 0; padding-left: 18px; font-size: 14px;">
-            <li><strong>WebStorm</strong>: built-in na porta <code>63342</code>
-              (antes habilitar em Settings → Build, Execution, Deployment →
-              Debugger → "Can accept external connections")</li>
-            <li><strong>VSCode</strong>: extensão Live Server
-              (porta <code>5500</code>, botão "Go Live")</li>
-            <li><strong>Python</strong>: na pasta do projeto rodar
-              <code>python -m http.server 5500</code></li>
-          </ul>
-        </li>
-        <li>Abrir o lab</li>
-        <li>Digitar a porta</li>
-        <li>Clicar <strong>Conectar</strong></li>
-        <li>Copiar a URL e mandar pro amigo</li>
-      </ol>
-      <div class="when">
-        Funciona <strong>enquanto o lab tiver aberto</strong>.
-        Fechou = caiu. Mas mostra mudanças ao vivo.
+<section id="como-usar">
+  <div class="wrap">
+    <p class="section-eyebrow">Como usar</p>
+    <h2 class="section-title">Dois modos, mesma simplicidade</h2>
+    <p class="section-sub">
+      Publicar uma pasta de build pronto, ou conectar uma porta local ao vivo.
+    </p>
+
+    <div class="modes">
+      <div class="mode-card publish">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3>Publicar pasta</h3>
+        <p class="mode-tag">Build estático · URL permanente</p>
+        <ol>
+          <li>Abrir o lab</li>
+          <li>Escolher a pasta do projeto (com <code>index.html</code> dentro)</li>
+          <li>Clicar <strong>Publicar</strong></li>
+          <li>Copiar a URL e mandar pro amigo</li>
+        </ol>
+        <div class="card-footer">
+          Funciona <strong>pra sempre</strong> (até apagar). Seu computador pode tá desligado que continua no ar.
+        </div>
+      </div>
+
+      <div class="mode-card tunnel">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <h3>Conectar porta</h3>
+        <p class="mode-tag">Dev server ao vivo · URL temporária</p>
+        <ol>
+          <li>Subir um servidor local. Três opções:
+            <ul>
+              <li><strong>WebStorm</strong> built-in (porta <code>63342</code>) — habilitar em <em>Settings → Build → Debugger</em> → "Can accept external connections"</li>
+              <li><strong>VSCode</strong> extensão Live Server (porta <code>5500</code>)</li>
+              <li><strong>Python</strong> <code>python -m http.server 5500</code></li>
+            </ul>
+          </li>
+          <li>Abrir o lab e digitar a porta</li>
+          <li>Clicar <strong>Conectar</strong></li>
+          <li>Copiar a URL e mandar pro amigo</li>
+        </ol>
+        <div class="card-footer">
+          Funciona <strong>enquanto o lab tiver aberto</strong>. Fechou = caiu. Mas mostra mudanças ao vivo.
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-  <h2>Qual modo escolher?</h2>
-  <table>
-    <thead>
-      <tr><th></th><th>Publicar pasta</th><th>Conectar porta</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Funciona com o computador desligado</td><td class="yes">sim</td><td class="no">não</td></tr>
-      <tr><td>Mostra mudanças ao vivo</td><td class="no">não</td><td class="yes">sim</td></tr>
-      <tr><td>Bom pra entregar trabalho</td><td class="yes">muito</td><td class="mid">instável</td></tr>
-      <tr><td>Bom pra demo rápida</td><td class="yes">muito</td><td class="yes">muito</td></tr>
-    </tbody>
-  </table>
+<section id="qual-modo">
+  <div class="wrap">
+    <p class="section-eyebrow">Comparação</p>
+    <h2 class="section-title">Qual modo escolher?</h2>
+    <p class="section-sub">Depende se você quer um link que sobreviva ou que mostre mudanças ao vivo.</p>
 
-  <h2>Projeto com build (Vite, React, Vue, Next)?</h2>
-  <p>
-    Mesma coisa, com um passo extra de <code>npm</code>:
-  </p>
-
-  <div class="modes">
-    <div class="card">
-      <h3>📤 Publicar + build</h3>
-      <ol>
-        <li>Rodar <code>npm run build</code></li>
-        <li>No lab, escolher a pasta <code>dist/</code> (ou <code>build/</code>) gerada</li>
-        <li>Publicar normal</li>
-      </ol>
-    </div>
-
-    <div class="card">
-      <h3>🔌 Conectar dev server</h3>
-      <ol>
-        <li>Rodar <code>npm run dev</code></li>
-        <li>Porta varia: Vite <code>5173</code>, CRA <code>3000</code>,
-            Next <code>3000</code></li>
-        <li>No lab, digitar essa porta e Conectar</li>
-      </ol>
+    <div class="comparison-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Publicar pasta</th>
+            <th>Conectar porta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Funciona com o computador desligado</td>
+            <td class="yes">sim</td>
+            <td class="no">não</td>
+          </tr>
+          <tr>
+            <td class="label">Mostra mudanças ao vivo</td>
+            <td class="no">não</td>
+            <td class="yes">sim</td>
+          </tr>
+          <tr>
+            <td class="label">Bom pra entregar trabalho</td>
+            <td class="yes">muito</td>
+            <td class="mid">instável</td>
+          </tr>
+          <tr>
+            <td class="label">Bom pra demo rápida</td>
+            <td class="yes">muito</td>
+            <td class="yes">muito</td>
+          </tr>
+          <tr>
+            <td class="label">Funciona com backend (Java, PHP…)</td>
+            <td class="no">só estático</td>
+            <td class="yes">se tem porta</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+</section>
 
-  <h2>Pegadinhas</h2>
+<section>
+  <div class="narrow">
+    <p class="section-eyebrow">Projeto com build</p>
+    <h2 class="section-title">Vite, React, Vue, Next…</h2>
+    <p class="section-sub">Mesma coisa, só que com um passo extra de <code>npm</code>.</p>
 
-  <div class="pitfall">
-    <strong>"Blocked request. This host is not allowed."</strong><br>
-    Vite e similares rejeitam Host externo por padrão. Se aparecer no
-    navegador no <strong>modo conectar porta</strong>, ajustar o
-    <code>vite.config.js</code>:
+    <div class="modes">
+      <div class="mode-card publish">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3>Publicar + build</h3>
+        <p class="mode-tag">Pra entregar trabalho</p>
+        <ol>
+          <li>Rodar <code>npm run build</code></li>
+          <li>No lab, escolher a pasta <code>dist/</code> (ou <code>build/</code>)</li>
+          <li>Publicar normal</li>
+        </ol>
+      </div>
+      <div class="mode-card tunnel">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Conectar dev server</h3>
+        <p class="mode-tag">Pra mostrar mudanças ao vivo</p>
+        <ol>
+          <li>Rodar <code>npm run dev</code></li>
+          <li>Porta: Vite <code>5173</code>, CRA <code>3000</code>, Next <code>3000</code></li>
+          <li>No lab, digitar essa porta e Conectar</li>
+        </ol>
+      </div>
+    </div>
   </div>
+</section>
+
+<section id="pegadinhas">
+  <div class="narrow">
+    <p class="section-eyebrow">Atenção</p>
+    <h2 class="section-title">Pegadinhas comuns</h2>
+
+    <div class="pitfalls-list">
+      <div class="pitfall">
+        <strong>"Blocked request. This host is not allowed."</strong><br>
+        Vite e similares rejeitam Host externo por padrão. Ajustar o <code>vite.config.js</code>:
+      </div>
 
 <pre><code>export default {
   server: {
@@ -284,27 +629,37 @@
   },
 }</code></pre>
 
-  <p style="font-size: 14px; color: var(--muted);">
-    Outros: <strong>CRA</strong> →
-    <code>HOST=0.0.0.0 DANGEROUSLY_DISABLE_HOST_CHECK=true npm start</code>.
-    <strong>Next.js</strong> → <code>next dev -H 0.0.0.0</code>.
-  </p>
+      <p>
+        <strong style="color: var(--text);">CRA:</strong>
+        <code>HOST=0.0.0.0 DANGEROUSLY_DISABLE_HOST_CHECK=true npm start</code><br>
+        <strong style="color: var(--text);">Next.js:</strong>
+        <code>next dev -H 0.0.0.0</code>
+      </p>
 
-  <div class="pitfall">
-    <strong>WebStorm built-in</strong> coloca o nome do projeto no caminho
-    (ex: <code>localhost:63342/meu-site/index.html</code>). No lab a
-    URL fica <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quiser
-    sem esse prefixo, prefira <code>python -m http.server</code>.
+      <div class="pitfall" style="margin-top: 28px;">
+        <strong>WebStorm coloca o nome do projeto no caminho</strong><br>
+        Ex.: <code>localhost:63342/meu-site/index.html</code> vira
+        <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quer URL na raiz,
+        prefira <code>python -m http.server</code>.
+      </div>
+    </div>
   </div>
+</section>
 
-  <h2>O caminho da request, visualmente</h2>
-  <div class="diagram">
-<pre>
-       MEU COMPUTADOR                              SERVIDOR (devi.tools)
+<section>
+  <div class="wrap">
+    <p class="section-eyebrow">Arquitetura</p>
+    <h2 class="section-title">O caminho da request</h2>
+    <p class="section-sub">
+      Modo publicar manda o zip uma vez; modo conectar abre WebSocket persistente.
+    </p>
+
+    <div class="diagram-wrap">
+<pre>       MEU COMPUTADOR                              SERVIDOR (devi.tools)
   ┌─────────────────────────┐               ┌────────────────────────────┐
   │                         │               │                            │
   │    ┌───────────────┐    │               │     ┌──────────────────┐   │
-  │    │      lab      │    │               │     │     lab 🌞       │   │
+  │    │      lab      │    │               │     │       lab        │   │
   │    └───────┬───────┘    │               │     └─────────┬────────┘   │
   │            │            │               │               │            │
   │   ┌────────┴────────┐   │               │               │            │
@@ -326,29 +681,64 @@
                                                        ┌──────────────────┐
                                                        │   amigo dela     │
                                                        │     (chrome)     │
-                                                       └──────────────────┘
-</pre>
+                                                       └──────────────────┘</pre>
+    </div>
   </div>
+</section>
 
-  <h2>Exemplo de URL gerada</h2>
-  <p>
-    O nome amigável é opcional. Sempre vem com 6 letrinhas aleatórias no
-    final pra ninguém adivinhar:
-  </p>
-<pre><code>https://meu-tcc-h7k2nq.devi.tools</code></pre>
+<section class="tight">
+  <div class="wrap">
+    <p class="section-eyebrow">Exemplo</p>
+    <h2 class="section-title">URL gerada</h2>
+    <p class="section-sub">
+      Nome amigável é opcional. Sempre vem com 6 letrinhas aleatórias no final pra ninguém adivinhar.
+    </p>
+    <div class="url-block">
+      <span class="scheme">https://</span><span class="slug">meu-tcc-h7k2nq</span><span class="dom">.devi.tools</span>
+    </div>
+    <p class="url-caption">
+      Slugs estáticos sem acesso por 30 dias são apagados automaticamente.
+    </p>
+  </div>
+</section>
 
-  <p style="font-size: 14px; color: var(--muted);">
-    Slugs estáticos sem acesso por 30 dias são apagados automaticamente
-    pra economizar espaço.
-  </p>
+<footer class="site">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="brand">
+          <span class="glyph">&lt;/&gt;</span>
+          <span class="name">
+            <span class="top">lab</span>
+            <span class="bot">devi tools</span>
+          </span>
+        </a>
+        <p>Túnel reverso e publicação estática caseira pra <code>*.devi.tools</code>.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Download</h4>
+        <a href="https://github.com/devitools/lab/releases/download/latest/lab.exe">Windows · lab.exe</a>
+        <a href="https://github.com/devitools/lab/releases/download/latest/lab-macos.zip">macOS · lab.app</a>
+        <a href="https://github.com/devitools/lab/releases">Todas as versões</a>
+      </div>
+      <div class="footer-col">
+        <h4>Projeto</h4>
+        <a href="https://github.com/devitools/lab">GitHub</a>
+        <a href="https://github.com/devitools/lab#readme">README</a>
+        <a href="https://github.com/devitools/lab/issues">Issues</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ecossistema</h4>
+        <a href="https://devi.tools">devi.tools</a>
+        <a href="https://github.com/devitools">GitHub Org</a>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <span>© 2026 Devitools · open source MIT</span>
+      <span><code>lab</code> Go + Python · binário ~15MB</span>
+    </div>
+  </div>
+</footer>
 
-  <footer>
-    Código aberto em
-    <a href="https://github.com/devitools/lab">github.com/devitools/lab</a>.
-    Servidor: <code>lab</code> (Go).
-    Cliente: <code>lab.exe</code> (Python + Tkinter).
-  </footer>
-
-</div>
 </body>
 </html>
