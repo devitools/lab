@@ -1,6 +1,8 @@
 # lab
 
-Túnel reverso + publicação estática caseira pra `*.lab.devi.tools`.
+Túnel reverso + publicação estática caseira pra `*.devi.tools`.
+
+Documentação amigável (pra mandar pra alguém usar): **<https://lab.devi.tools>**.
 
 ## Como funciona (visão simples)
 
@@ -10,7 +12,7 @@ gerar uma URL pública que qualquer um pode abrir no navegador.
 Você abre o `floofy.exe` no Windows e escolhe um dos dois modos:
 
 ```
-       MEU PC (Windows)                             SERVIDOR  (lab.devi.tools)
+       MEU PC (Windows)                               SERVIDOR (devi.tools)
   ┌───────────────────────────┐                ┌──────────────────────────────┐
   │                           │                │                              │
   │     ┌───────────────┐     │                │      ┌────────────────┐      │
@@ -20,7 +22,7 @@ Você abre o `floofy.exe` no Windows e escolhe um dos dois modos:
   │   ┌─────────┴─────────┐   │                │               │              │
   │   │                   │   │                │               │              │
   │   ▼                   ▼   │                │               ▼              │
-  │ [Publicar]      [Conectar]│                │     *.lab.devi.tools         │
+  │ [Publicar]      [Conectar]│                │       *.devi.tools           │
   │  pasta            porta   │                │     (URL pública             │
   │   │                 │     │                │      com HTTPS)              │
   │   │                 │     │                │               │              │
@@ -33,7 +35,7 @@ Você abre o `floofy.exe` no Windows e escolhe um dos dois modos:
       │ zip via HTTPS   │ túnel WebSocket                      │
       └────►────────────┴──────►──────────────────────────►────┘
               (uma vez)         (enquanto o floofy           o amigo abre
-                                 estiver aberto)             <slug>.lab.devi.tools
+                                 estiver aberto)             <slug>.devi.tools
 
                                                                     ▼
 
@@ -55,7 +57,7 @@ Você abre o `floofy.exe` no Windows e escolhe um dos dois modos:
 A URL fica de pé pra sempre (até apagar). Funciona offline depois — o
 PC da filha pode tá desligado e o site continua no ar.
 
-Exemplo de URL: `https://meu-tcc-h7k2nq3wxy8m.lab.devi.tools`
+Exemplo de URL: `https://meu-tcc-h7k2nq.devi.tools`
 
 ### Modo "Conectar porta" (dev server ao vivo)
 
@@ -70,7 +72,7 @@ A URL fica ativa **enquanto o floofy.exe tiver aberto**. Fecha o app =
 URL cai. Bom pra mostrar mudança ao vivo (a tela do amigo atualiza
 junto com a sua quando você salva o código).
 
-Exemplo de URL: `https://live-3yes4hgc64eo.lab.devi.tools`
+Exemplo de URL: `https://live-3yes4h.devi.tools`
 
 ### Qual modo escolher
 
@@ -93,7 +95,7 @@ ajustar o `vite.config.js`:
 export default {
   server: {
     host: true,
-    allowedHosts: ['.lab.devi.tools'],
+    allowedHosts: ['.devi.tools'],
   },
 }
 ```
@@ -106,16 +108,19 @@ Outros: ver [client/README.md](client/README.md).
 
 - [`server/`](server/) — serviço Go (`floofy-sun`) que roda na VPS
   `devi.tools`. Recebe uploads, mantém túneis WebSocket reversos,
-  roteia `<slug>.lab.devi.tools` pro destino certo.
+  roteia `<slug>.devi.tools` pro destino certo.
 - [`client/`](client/) — app Windows (Python + Tkinter empacotado em
   `.exe`) com as duas abas. Build via `client/build.bat`.
+- [`docs/`](docs/) — landing pública em <https://lab.devi.tools>
+  (GitHub Pages, custom domain via CNAME).
 
 ## Decisões de arquitetura
 
 | | |
 |---|---|
-| Subdomínio raiz | `*.lab.devi.tools` |
-| Cert | Wildcard via DNS-01 (DO API), renova mensal via cron |
-| Auth | Slug aleatório `<friendly>-<rand12>` ~60 bits (sem token) |
+| Subdomínio raiz | `*.devi.tools` (regex VIRTUAL_HOST, match exato vence pra subdomínios já cadastrados) |
+| Cert | Wildcard `*.devi.tools` via certbot DNS-01 (DO API), renova semanal via cron |
+| Auth | Slug aleatório `<friendly>-<rand6>` ~30 bits (sem token) |
 | Storage estático | `/home/heimdall/floofy/sites/<slug>/` |
-| Túnel offline | 30 dias sem acesso → GC remove |
+| GC estático | 30 dias sem acesso → registry remove |
+| Admin endpoint | `floofy.devi.tools` (`/publish`, `/tunnel`, `/health`) |

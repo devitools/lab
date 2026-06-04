@@ -121,7 +121,7 @@ code{background:#f3f3f3;padding:2px 6px;border-radius:4px}
 a{color:#d97706}</style>
 <h1>floofy-sun 🌞</h1>
 <p>Endpoint da API que roda atrás de <code>*.%s</code>.</p>
-<p>Pra ver como funciona, abra <a href="https://%s">%s</a>.</p>
+<p>Pra ver como funciona, abra <a href="https://lab.%s">lab.%s</a>.</p>
 <ul>
   <li><code>POST /publish/</code> — upload de build estático (multipart: <code>file</code>, <code>friendly</code>)</li>
   <li><code>GET /tunnel/</code> — WebSocket reverso (query: <code>friendly</code>)</li>

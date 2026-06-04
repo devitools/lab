@@ -1,6 +1,6 @@
 # floofy (client)
 
-App Windows pra publicar projetos locais em `*.lab.devi.tools`.
+App Windows pra publicar projetos locais em `*.devi.tools`.
 
 ## Build
 
@@ -22,7 +22,7 @@ Saída: `dist\floofy.exe` (~15MB, single-file, sem dependência externa).
 5. Clicar **Publicar**.
 6. Copiar a URL retornada e mandar pro amigo.
 
-Build estático fica salvo em `<slug>.lab.devi.tools` por 30 dias (renova quando acessado).
+Build estático fica salvo em `<slug>.devi.tools` por 30 dias (renova quando acessado).
 
 ### Modo "Conectar porta"
 1. Rodar o dev server local (`npm run dev`, etc.).
@@ -43,7 +43,7 @@ A maioria dos dev servers rejeita requests com Host externo por padrão.
 export default {
   server: {
     host: true,
-    allowedHosts: ['.lab.devi.tools'],
+    allowedHosts: ['.devi.tools'],
   },
 }
 ```

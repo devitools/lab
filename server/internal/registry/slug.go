@@ -11,7 +11,7 @@ import (
 var friendlyRe = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 
 const (
-	randLen    = 12
+	randLen    = 6
 	friendlyMax = 24
 )
 

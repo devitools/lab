@@ -8,13 +8,13 @@ services:
     volumes:
       - ./sites:/srv/sites
     environment:
-      - FLOOFY_ROOT_DOMAIN=lab.devi.tools
-      - FLOOFY_ADMIN_HOST=floofy.lab.devi.tools
+      - FLOOFY_ROOT_DOMAIN=devi.tools
+      - FLOOFY_ADMIN_HOST=floofy.devi.tools
       - FLOOFY_SITES_DIR=/srv/sites
       - FLOOFY_LISTEN=:8080
-      - VIRTUAL_HOST=~^([a-z0-9-]+\.)?lab\.devi\.tools$$
+      - VIRTUAL_HOST=~^[a-z0-9-]+\.devi\.tools$$
       - VIRTUAL_PORT=8080
-      - CERT_NAME=lab.devi.tools
+      - CERT_NAME=wildcard
 
 networks:
   reverse-proxy:

@@ -1,6 +1,6 @@
 """Constantes do servidor floofy-sun."""
 
-SERVER_HOST = "floofy.lab.devi.tools"
+SERVER_HOST = "floofy.devi.tools"
 PUBLISH_URL = f"https://{SERVER_HOST}/publish/"
 TUNNEL_URL = f"wss://{SERVER_HOST}/tunnel/"
 

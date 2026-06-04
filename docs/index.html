@@ -200,7 +200,7 @@
   <h2>O caminho da request, visualmente</h2>
   <div class="diagram">
 <pre>
-      MEU PC (Windows)                          SERVIDOR (lab.devi.tools)
+      MEU PC (Windows)                            SERVIDOR (devi.tools)
   ┌─────────────────────────┐               ┌────────────────────────────┐
   │                         │               │                            │
   │    ┌───────────────┐    │               │     ┌──────────────────┐   │
@@ -209,7 +209,7 @@
   │            │            │               │               │            │
   │   ┌────────┴────────┐   │               │               │            │
   │   │                 │   │               │               ▼            │
-  │   ▼                 ▼   │               │       *.lab.devi.tools     │
+  │   ▼                 ▼   │               │         *.devi.tools       │
   │ [Publicar]   [Conectar] │               │       (URL pública,        │
   │   │                 │   │               │        HTTPS automático)   │
   │   ▼                 ▼   │               │               │            │
@@ -221,7 +221,7 @@
       │  zip via HTTPS  │   túnel WebSocket persistente     │
       └─►───────────────┴──────►─────────────────────►──────┘
           (uma vez)         (enquanto o floofy            o amigo abre
-                             estiver aberto)              &lt;slug&gt;.lab.devi.tools
+                             estiver aberto)                &lt;slug&gt;.devi.tools
                                                                 ▼
                                                        ┌──────────────────┐
                                                        │  amigo da filha  │
@@ -255,7 +255,7 @@
 <pre><code>export default {
   server: {
     host: true,
-    allowedHosts: ['.lab.devi.tools'],
+    allowedHosts: ['.devi.tools'],
   },
 }</code></pre>
 
@@ -267,10 +267,10 @@
 
   <h2>Exemplo de URL gerada</h2>
   <p>
-    O nome amigável é opcional. Sempre vem com 12 letrinhas aleatórias no
+    O nome amigável é opcional. Sempre vem com 6 letrinhas aleatórias no
     final pra ninguém adivinhar:
   </p>
-<pre><code>https://meu-tcc-h7k2nq3wxy8m.lab.devi.tools</code></pre>
+<pre><code>https://meu-tcc-h7k2nq.devi.tools</code></pre>
 
   <p style="font-size: 14px; color: var(--muted);">
     Slugs estáticos sem acesso por 30 dias são apagados automaticamente
