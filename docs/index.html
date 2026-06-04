@@ -242,6 +242,58 @@
 </pre>
   </div>
 
+  <h2>Tô só com HTML/CSS/JS (sem build)</h2>
+  <p>
+    Vale tanto pra projeto com build (Vite/React/Vue/etc.) quanto pra
+    HTML escrito na mão. No caso sem build:
+  </p>
+
+  <div class="modes">
+    <div class="card">
+      <h3>📤 Publicar pasta</h3>
+      <p style="margin: 0 0 8px;">
+        Pula o <code>npm run build</code>. Aponta direto pra pasta do
+        projeto que tem o <code>index.html</code> dentro. O floofy zipa
+        e sobe.
+      </p>
+      <div class="when">
+        Funciona se <code>index.html</code> tá na raiz da pasta escolhida
+        e os caminhos pra CSS/JS são relativos (ex: <code>./style.css</code>,
+        não <code>/style.css</code> com barra inicial).
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🔌 Conectar porta</h3>
+      <p style="margin: 0 0 8px;">
+        Precisa de um servidorzinho local rodando o HTML. Três opções:
+      </p>
+      <ol style="margin: 0; padding-left: 22px; font-size: 14.5px;">
+        <li><strong>WebStorm built-in</strong> (porta <code>63342</code>)
+          — abre o HTML pelo botão browser, mas <em>antes</em> habilitar em
+          Settings → Build, Execution, Deployment → Debugger →
+          "Can accept external connections"
+        </li>
+        <li><strong>VSCode Live Server</strong> (porta <code>5500</code>)
+          — extensão "Live Server" da Microsoft, botão "Go Live" embaixo
+        </li>
+        <li><strong>Python direto</strong> (porta sua escolha) — na
+          pasta do projeto:
+          <code>python -m http.server 5500</code>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <strong>WebStorm built-in tem peculiaridade:</strong> a URL
+    incluí o nome do projeto no caminho (ex:
+    <code>localhost:63342/meu-site/index.html</code>). No floofy fica
+    <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quiser URL limpa
+    (sem o nome do projeto no caminho), prefira o
+    <code>python -m http.server</code>.
+  </div>
+
   <h2>Qual modo escolher?</h2>
   <table>
     <thead>
