@@ -15,6 +15,12 @@ const (
 	friendlyMax = 24
 )
 
+var reservedFriendly = map[string]bool{
+	"lab": true, "floofy": true, "www": true, "api": true,
+	"mail": true, "ftp": true, "smtp": true, "admin": true,
+	"root": true, "dev": true, "staging": true,
+}
+
 func NewSlug(friendly string) (string, error) {
 	friendly = strings.ToLower(strings.TrimSpace(friendly))
 	if friendly != "" {
@@ -23,6 +29,9 @@ func NewSlug(friendly string) (string, error) {
 		}
 		if !friendlyRe.MatchString(friendly) {
 			return "", fmt.Errorf("friendly must be kebab-case (a-z, 0-9, hyphens)")
+		}
+		if reservedFriendly[friendly] {
+			return "", fmt.Errorf("friendly %q is reserved", friendly)
 		}
 	}
 

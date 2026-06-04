@@ -1,6 +1,7 @@
 package server
 
 import (
+	_ "embed"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,6 +12,15 @@ import (
 	"github.com/devitools/lab/server/internal/static"
 	"github.com/devitools/lab/server/internal/tunnel"
 )
+
+//go:embed docs_landing.html
+var docsLanding []byte
+
+var reservedSlugs = map[string]bool{
+	"lab": true, "floofy": true, "www": true, "api": true,
+	"mail": true, "ftp": true, "smtp": true, "admin": true,
+	"root": true, "dev": true, "staging": true,
+}
 
 type Config struct {
 	Listen        string
@@ -43,6 +53,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	slug, ok := s.slugFromHost(host)
 	if !ok {
 		http.Error(w, "unknown host", http.StatusNotFound)
+		return
+	}
+
+	if slug == "lab" {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "public, max-age=300")
+		_, _ = w.Write(docsLanding)
+		return
+	}
+
+	if reservedSlugs[slug] {
+		http.Error(w, "reserved subdomain", http.StatusNotFound)
 		return
 	}
 
