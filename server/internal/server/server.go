@@ -17,9 +17,9 @@ import (
 var docsLanding []byte
 
 var reservedSlugs = map[string]bool{
-	"lab": true, "floofy": true, "www": true, "api": true,
-	"mail": true, "ftp": true, "smtp": true, "admin": true,
-	"root": true, "dev": true, "staging": true,
+	"lab": true, "docs": true, "floofy": true, "www": true,
+	"api": true, "mail": true, "ftp": true, "smtp": true,
+	"admin": true, "root": true, "dev": true, "staging": true,
 }
 
 type Config struct {
@@ -56,7 +56,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if slug == "lab" {
+	if slug == "lab" || slug == "docs" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "public, max-age=300")
 		_, _ = w.Write(docsLanding)
