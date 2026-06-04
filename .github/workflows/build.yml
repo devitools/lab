@@ -42,13 +42,13 @@ jobs:
       - name: build windows
         if: matrix.os == 'windows-latest'
         working-directory: client
-        run: pyinstaller --onefile --windowed --name floofy --collect-all websockets app.py
+        run: pyinstaller --onefile --windowed --name floofy --collect-all websockets --collect-all certifi app.py
 
       - name: build macos
         if: matrix.os == 'macos-latest'
         working-directory: client
         run: |
-          pyinstaller --windowed --name floofy --osx-bundle-identifier com.devitools.floofy --collect-all websockets app.py
+          pyinstaller --windowed --name floofy --osx-bundle-identifier com.devitools.floofy --collect-all websockets --collect-all certifi app.py
           cd dist && ditto -c -k --sequesterRsrc --keepParent floofy.app ../floofy-macos.zip
           ls -la ../floofy-macos.zip
 

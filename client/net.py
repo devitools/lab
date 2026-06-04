@@ -4,13 +4,19 @@ import base64
 import io
 import json
 import os
+import ssl
 import zipfile
 from typing import Callable, Optional
 
+import certifi
 import httpx
 import websockets
 
 import config
+
+
+def _ssl_context() -> ssl.SSLContext:
+    return ssl.create_default_context(cafile=certifi.where())
 
 
 def zip_directory(path: str) -> bytes:
@@ -32,7 +38,7 @@ def publish_folder(path: str, friendly: Optional[str]) -> dict:
         raise ValueError(f"build muito grande ({len(data) >> 20}MB > {config.MAX_UPLOAD_MB}MB)")
     files = {"file": ("dist.zip", data, "application/zip")}
     form = {"friendly": friendly or ""}
-    with httpx.Client(timeout=config.UPLOAD_TIMEOUT_S) as client:
+    with httpx.Client(timeout=config.UPLOAD_TIMEOUT_S, verify=certifi.where()) as client:
         r = client.post(config.PUBLISH_URL, files=files, data=form)
     r.raise_for_status()
     return r.json()
@@ -67,14 +73,14 @@ class TunnelClient:
             try:
                 self.on_event("status", {"state": "connecting"})
                 url = config.TUNNEL_URL + f"?friendly={self.friendly}"
-                async with websockets.connect(url, max_size=64 << 20) as ws:
+                async with websockets.connect(url, max_size=64 << 20, ssl=_ssl_context()) as ws:
                     attempt = 0
                     hello = json.loads(await ws.recv())
                     if hello.get("type") != "hello":
                         raise RuntimeError(f"esperava hello, veio {hello}")
                     self.on_event("up", {"url": hello["url"], "slug": hello["slug"]})
 
-                    async with httpx.AsyncClient(timeout=config.TUNNEL_LOCAL_TIMEOUT_S) as http:
+                    async with httpx.AsyncClient(timeout=config.TUNNEL_LOCAL_TIMEOUT_S, verify=certifi.where()) as http:
                         await self._pump(ws, http)
             except asyncio.CancelledError:
                 return

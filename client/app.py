@@ -199,6 +199,10 @@ class TunnelTab:
         ttk.Button(url_row, text="Copiar", command=self.copy_url).grid(row=0, column=1, padx=(6, 0))
         ttk.Button(url_row, text="Abrir", command=self.open_url).grid(row=0, column=2, padx=(6, 0))
 
+        self.error_var = tk.StringVar()
+        self.error_label = ttk.Label(f, textvariable=self.error_var, foreground="#cc3333", wraplength=480)
+        self.error_label.grid(row=9, column=0, sticky="ew", pady=(10, 0))
+
         f.columnconfigure(0, weight=1)
 
     def _draw_dot(self, color: str):
@@ -250,6 +254,7 @@ class TunnelTab:
     def handle_event(self, kind: str, payload: dict):
         if kind == "up":
             self.url_var.set(payload["url"])
+            self.error_var.set("")
             self._set_state("up")
         elif kind == "status":
             state = payload.get("state", "off")
@@ -261,9 +266,12 @@ class TunnelTab:
                 self.app.tunnel_client = None
                 self.app.tunnel_thread = None
                 self.url_var.set("")
+                self.error_var.set("")
                 self.action_btn.config(text="Conectar")
         elif kind == "error":
-            self._set_state("error", payload.get("message", "")[:40])
+            msg = payload.get("message", "")
+            self.error_var.set(f"último erro: {msg}")
+            self._set_state("error", msg[:40])
 
     def copy_url(self):
         url = self.url_var.get()
