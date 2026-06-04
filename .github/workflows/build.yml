@@ -1,0 +1,96 @@
+name: build floofy
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches: [main]
+    paths:
+      - 'client/**'
+      - '.github/workflows/build-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: floofy-windows
+            artifact_path: client/dist/floofy.exe
+          - os: macos-latest
+            artifact_name: floofy-macos
+            artifact_path: client/floofy-macos.zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: install deps
+        working-directory: client
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: build windows
+        if: matrix.os == 'windows-latest'
+        working-directory: client
+        run: pyinstaller --onefile --windowed --name floofy --collect-all websockets app.py
+
+      - name: build macos
+        if: matrix.os == 'macos-latest'
+        working-directory: client
+        run: |
+          pyinstaller --windowed --name floofy --osx-bundle-identifier com.devitools.floofy --collect-all websockets app.py
+          cd dist && ditto -c -k --sequesterRsrc --keepParent floofy.app ../floofy-macos.zip
+          ls -la ../floofy-macos.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          retention-days: 30
+
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: list artifacts
+        run: ls -laR artifacts
+
+      - name: rolling latest (main pushes)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: floofy (rolling latest)
+          files: |
+            artifacts/floofy-windows/floofy.exe
+            artifacts/floofy-macos/floofy-macos.zip
+          make_latest: true
+          body: |
+            Build automático do último commit em `main`.
+
+            - **Windows**: baixar `floofy.exe`
+            - **macOS** (Apple Silicon): baixar `floofy-macos.zip`, descompactar, mover `floofy.app` pra Aplicativos. Na primeira abertura, click-direito → Abrir (Gatekeeper bloqueia binários sem assinatura).
+
+      - name: tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/floofy-windows/floofy.exe
+            artifacts/floofy-macos/floofy-macos.zip
+          generate_release_notes: true

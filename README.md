@@ -2,8 +2,8 @@
 
 Túnel reverso + publicação estática caseira pra `*.devi.tools`.
 
-- **Documentação amigável** (pra mandar pra alguém usar): <https://lab.devi.tools>
-- **Download do floofy.exe** (Windows): <https://github.com/devitools/lab/releases/download/latest/floofy.exe>
+- **Documentação amigável** (pra mandar pra alguém usar): <https://docs.devi.tools>
+- **Download floofy** — [Windows](https://github.com/devitools/lab/releases/download/latest/floofy.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/floofy-macos.zip)
 
 ## Como funciona (visão simples)
 
