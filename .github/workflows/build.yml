@@ -7,7 +7,7 @@ on:
     branches: [main]
     paths:
       - 'client/**'
-      - '.github/workflows/build-windows.yml'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
@@ -47,8 +47,61 @@ jobs:
       - name: build macos
         if: matrix.os == 'macos-latest'
         working-directory: client
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
         run: |
-          pyinstaller --windowed --name floofy --osx-bundle-identifier com.devitools.floofy --collect-all websockets --collect-all certifi app.py
+          pyinstaller --windowed --name floofy \
+            --osx-bundle-identifier com.devitools.floofy \
+            --collect-all websockets --collect-all certifi \
+            app.py
+
+          if [ -n "$APPLE_SIGNING_IDENTITY" ] && [ -n "$APPLE_CERTIFICATE" ]; then
+            echo "::group::codesign"
+            echo "$APPLE_CERTIFICATE" | base64 -d > /tmp/cert.p12
+            KEYCHAIN_PWD=$(uuidgen)
+            security create-keychain -p "$KEYCHAIN_PWD" build.keychain
+            security set-keychain-settings -lut 21600 build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "$KEYCHAIN_PWD" build.keychain
+            security import /tmp/cert.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" build.keychain
+
+            codesign --deep --force --verify --verbose --timestamp \
+              --options runtime \
+              --entitlements entitlements.plist \
+              --sign "$APPLE_SIGNING_IDENTITY" \
+              dist/floofy.app
+
+            codesign --verify --deep --strict --verbose=2 dist/floofy.app
+            echo "::endgroup::"
+
+            if [ -n "$APPLE_API_KEY_CONTENT" ] && [ -n "$APPLE_API_KEY" ] && [ -n "$APPLE_API_ISSUER" ]; then
+              echo "::group::notarize"
+              mkdir -p "$HOME/private_keys"
+              KEY_PATH="$HOME/private_keys/AuthKey_${APPLE_API_KEY}.p8"
+              echo "$APPLE_API_KEY_CONTENT" > "$KEY_PATH"
+
+              ditto -c -k --sequesterRsrc --keepParent dist/floofy.app /tmp/floofy-notarize.zip
+              xcrun notarytool submit /tmp/floofy-notarize.zip \
+                --key "$KEY_PATH" \
+                --key-id "$APPLE_API_KEY" \
+                --issuer "$APPLE_API_ISSUER" \
+                --wait
+
+              xcrun stapler staple dist/floofy.app
+              echo "::endgroup::"
+            else
+              echo "::warning::Notarize secrets missing — assinado mas sem notarização (Gatekeeper ainda bloqueia)"
+            fi
+          else
+            echo "::warning::Signing secrets missing — build não assinado (Gatekeeper bloqueia)"
+          fi
+
           cd dist && ditto -c -k --sequesterRsrc --keepParent floofy.app ../floofy-macos.zip
           ls -la ../floofy-macos.zip
 
