@@ -186,121 +186,47 @@
     </span>
   </div>
 
+  <h2>Como usar</h2>
+
   <div class="modes">
     <div class="card">
       <h3>📤 Publicar pasta</h3>
       <ol>
-        <li>Rodar <code>npm run build</code></li>
-        <li>Abrir o floofy.exe</li>
-        <li>Escolher a pasta <code>dist/</code></li>
+        <li>Abrir o floofy</li>
+        <li>Escolher a pasta do projeto (com <code>index.html</code> dentro)</li>
         <li>Clicar <strong>Publicar</strong></li>
         <li>Copiar a URL e mandar pro amigo</li>
       </ol>
       <div class="when">
-        Funciona <strong>pra sempre</strong> (até apagar) — seu PC pode
-        tá desligado que continua no ar.
+        Funciona <strong>pra sempre</strong> (até apagar) — seu
+        computador pode tá desligado que continua no ar.
       </div>
     </div>
 
     <div class="card">
       <h3>🔌 Conectar porta</h3>
       <ol>
-        <li>Rodar <code>npm run dev</code></li>
-        <li>Abrir o floofy.exe</li>
-        <li>Digitar a porta (<code>5173</code> pro Vite)</li>
+        <li>Rodar um servidor local na sua pasta. Três opções:
+          <ul style="margin: 4px 0 0; padding-left: 18px; font-size: 14px;">
+            <li><strong>WebStorm</strong>: built-in na porta <code>63342</code>
+              (antes habilitar em Settings → Build, Execution, Deployment →
+              Debugger → "Can accept external connections")</li>
+            <li><strong>VSCode</strong>: extensão Live Server
+              (porta <code>5500</code>, botão "Go Live")</li>
+            <li><strong>Python</strong>: na pasta do projeto rodar
+              <code>python -m http.server 5500</code></li>
+          </ul>
+        </li>
+        <li>Abrir o floofy</li>
+        <li>Digitar a porta</li>
         <li>Clicar <strong>Conectar</strong></li>
         <li>Copiar a URL e mandar pro amigo</li>
       </ol>
       <div class="when">
-        Funciona <strong>enquanto o floofy.exe tiver aberto</strong>.
-        Fechou = caiu. Mas mostra mudanças ao vivo (HMR).
+        Funciona <strong>enquanto o floofy tiver aberto</strong>.
+        Fechou = caiu. Mas mostra mudanças ao vivo.
       </div>
     </div>
-  </div>
-
-  <h2>O caminho da request, visualmente</h2>
-  <div class="diagram">
-<pre>
-      MEU PC (Windows)                            SERVIDOR (devi.tools)
-  ┌─────────────────────────┐               ┌────────────────────────────┐
-  │                         │               │                            │
-  │    ┌───────────────┐    │               │     ┌──────────────────┐   │
-  │    │  floofy.exe   │    │               │     │   floofy-sun 🌞  │   │
-  │    └───────┬───────┘    │               │     └─────────┬────────┘   │
-  │            │            │               │               │            │
-  │   ┌────────┴────────┐   │               │               │            │
-  │   │                 │   │               │               ▼            │
-  │   ▼                 ▼   │               │         *.devi.tools       │
-  │ [Publicar]   [Conectar] │               │       (URL pública,        │
-  │   │                 │   │               │        HTTPS automático)   │
-  │   ▼                 ▼   │               │               │            │
-  │ dist/         localhost │               │               │            │
-  │ (build)         :5173   │               │               │            │
-  │   │                 │   │               │               │            │
-  └───┼─────────────────┼───┘               └───────────────┼────────────┘
-      │                 │                                   │
-      │  zip via HTTPS  │   túnel WebSocket persistente     │
-      └─►───────────────┴──────►─────────────────────►──────┘
-          (uma vez)         (enquanto o floofy            o amigo abre
-                             estiver aberto)                &lt;slug&gt;.devi.tools
-                                                                ▼
-                                                       ┌──────────────────┐
-                                                       │  amigo da filha  │
-                                                       │      (chrome)    │
-                                                       └──────────────────┘
-</pre>
-  </div>
-
-  <h2>Tô só com HTML/CSS/JS (sem build)</h2>
-  <p>
-    Vale tanto pra projeto com build (Vite/React/Vue/etc.) quanto pra
-    HTML escrito na mão. No caso sem build:
-  </p>
-
-  <div class="modes">
-    <div class="card">
-      <h3>📤 Publicar pasta</h3>
-      <p style="margin: 0 0 8px;">
-        Pula o <code>npm run build</code>. Aponta direto pra pasta do
-        projeto que tem o <code>index.html</code> dentro. O floofy zipa
-        e sobe.
-      </p>
-      <div class="when">
-        Funciona se <code>index.html</code> tá na raiz da pasta escolhida
-        e os caminhos pra CSS/JS são relativos (ex: <code>./style.css</code>,
-        não <code>/style.css</code> com barra inicial).
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>🔌 Conectar porta</h3>
-      <p style="margin: 0 0 8px;">
-        Precisa de um servidorzinho local rodando o HTML. Três opções:
-      </p>
-      <ol style="margin: 0; padding-left: 22px; font-size: 14.5px;">
-        <li><strong>WebStorm built-in</strong> (porta <code>63342</code>)
-          — abre o HTML pelo botão browser, mas <em>antes</em> habilitar em
-          Settings → Build, Execution, Deployment → Debugger →
-          "Can accept external connections"
-        </li>
-        <li><strong>VSCode Live Server</strong> (porta <code>5500</code>)
-          — extensão "Live Server" da Microsoft, botão "Go Live" embaixo
-        </li>
-        <li><strong>Python direto</strong> (porta sua escolha) — na
-          pasta do projeto:
-          <code>python -m http.server 5500</code>
-        </li>
-      </ol>
-    </div>
-  </div>
-
-  <div class="pitfall">
-    <strong>WebStorm built-in tem peculiaridade:</strong> a URL
-    incluí o nome do projeto no caminho (ex:
-    <code>localhost:63342/meu-site/index.html</code>). No floofy fica
-    <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quiser URL limpa
-    (sem o nome do projeto no caminho), prefira o
-    <code>python -m http.server</code>.
   </div>
 
   <h2>Qual modo escolher?</h2>
@@ -309,20 +235,46 @@
       <tr><th></th><th>Publicar pasta</th><th>Conectar porta</th></tr>
     </thead>
     <tbody>
-      <tr><td>Funciona com o PC desligado</td><td class="yes">sim</td><td class="no">não</td></tr>
-      <tr><td>Mostra mudanças ao vivo (HMR)</td><td class="no">não</td><td class="yes">sim</td></tr>
-      <tr><td>Precisa rodar <code>npm run build</code></td><td class="yes">antes</td><td class="no">não</td></tr>
+      <tr><td>Funciona com o computador desligado</td><td class="yes">sim</td><td class="no">não</td></tr>
+      <tr><td>Mostra mudanças ao vivo</td><td class="no">não</td><td class="yes">sim</td></tr>
       <tr><td>Bom pra entregar trabalho</td><td class="yes">muito</td><td class="mid">instável</td></tr>
-      <tr><td>Bom pra demo rápida</td><td class="mid">se já tem build</td><td class="yes">muito</td></tr>
+      <tr><td>Bom pra demo rápida</td><td class="yes">muito</td><td class="yes">muito</td></tr>
     </tbody>
   </table>
 
-  <h2>A pegadinha mais comum</h2>
+  <h2>Projeto com build (Vite, React, Vue, Next)?</h2>
+  <p>
+    Mesma coisa, com um passo extra de <code>npm</code>:
+  </p>
+
+  <div class="modes">
+    <div class="card">
+      <h3>📤 Publicar + build</h3>
+      <ol>
+        <li>Rodar <code>npm run build</code></li>
+        <li>No floofy, escolher a pasta <code>dist/</code> (ou <code>build/</code>) gerada</li>
+        <li>Publicar normal</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3>🔌 Conectar dev server</h3>
+      <ol>
+        <li>Rodar <code>npm run dev</code></li>
+        <li>Porta varia: Vite <code>5173</code>, CRA <code>3000</code>,
+            Next <code>3000</code></li>
+        <li>No floofy, digitar essa porta e Conectar</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>Pegadinhas</h2>
+
   <div class="pitfall">
     <strong>"Blocked request. This host is not allowed."</strong><br>
-    Vite (e maioria dos dev servers) recusa Host externo por padrão. Se
-    isso aparecer no navegador no <strong>modo conectar porta</strong>,
-    ajusta o <code>vite.config.js</code>:
+    Vite e similares rejeitam Host externo por padrão. Se aparecer no
+    navegador no <strong>modo conectar porta</strong>, ajustar o
+    <code>vite.config.js</code>:
   </div>
 
 <pre><code>export default {
@@ -333,10 +285,50 @@
 }</code></pre>
 
   <p style="font-size: 14px; color: var(--muted);">
-    Outros frameworks: <strong>CRA</strong> →
+    Outros: <strong>CRA</strong> →
     <code>HOST=0.0.0.0 DANGEROUSLY_DISABLE_HOST_CHECK=true npm start</code>.
     <strong>Next.js</strong> → <code>next dev -H 0.0.0.0</code>.
   </p>
+
+  <div class="pitfall">
+    <strong>WebStorm built-in</strong> coloca o nome do projeto no caminho
+    (ex: <code>localhost:63342/meu-site/index.html</code>). No floofy a
+    URL fica <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quiser
+    sem esse prefixo, prefira <code>python -m http.server</code>.
+  </div>
+
+  <h2>O caminho da request, visualmente</h2>
+  <div class="diagram">
+<pre>
+       MEU COMPUTADOR                              SERVIDOR (devi.tools)
+  ┌─────────────────────────┐               ┌────────────────────────────┐
+  │                         │               │                            │
+  │    ┌───────────────┐    │               │     ┌──────────────────┐   │
+  │    │    floofy     │    │               │     │   floofy-sun 🌞  │   │
+  │    └───────┬───────┘    │               │     └─────────┬────────┘   │
+  │            │            │               │               │            │
+  │   ┌────────┴────────┐   │               │               │            │
+  │   │                 │   │               │               ▼            │
+  │   ▼                 ▼   │               │         *.devi.tools       │
+  │ [Publicar]   [Conectar] │               │       (URL pública,        │
+  │   │                 │   │               │        HTTPS automático)   │
+  │   ▼                 ▼   │               │               │            │
+  │ pasta         localhost │               │               │            │
+  │ do site         :5500   │               │               │            │
+  │   │                 │   │               │               │            │
+  └───┼─────────────────┼───┘               └───────────────┼────────────┘
+      │                 │                                   │
+      │  zip via HTTPS  │   túnel WebSocket persistente     │
+      └─►───────────────┴──────►─────────────────────►──────┘
+          (uma vez)         (enquanto o floofy            o amigo abre
+                             estiver aberto)                &lt;slug&gt;.devi.tools
+                                                                ▼
+                                                       ┌──────────────────┐
+                                                       │   amigo dela     │
+                                                       │     (chrome)     │
+                                                       └──────────────────┘
+</pre>
+  </div>
 
   <h2>Exemplo de URL gerada</h2>
   <p>
