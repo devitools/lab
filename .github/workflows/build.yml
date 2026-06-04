@@ -87,13 +87,15 @@ jobs:
               echo "$APPLE_API_KEY_CONTENT" > "$KEY_PATH"
 
               ditto -c -k --sequesterRsrc --keepParent dist/lab.app /tmp/lab-notarize.zip
-              xcrun notarytool submit /tmp/lab-notarize.zip \
-                --key "$KEY_PATH" \
-                --key-id "$APPLE_API_KEY" \
-                --issuer "$APPLE_API_ISSUER" \
-                --wait
-
-              xcrun stapler staple dist/lab.app
+              if xcrun notarytool submit /tmp/lab-notarize.zip \
+                  --key "$KEY_PATH" \
+                  --key-id "$APPLE_API_KEY" \
+                  --issuer "$APPLE_API_ISSUER" \
+                  --wait; then
+                xcrun stapler staple dist/lab.app
+              else
+                echo "::warning::Notarization failed — shipping signed-only build (likely expired Apple Developer agreement at https://appstoreconnect.apple.com)"
+              fi
               echo "::endgroup::"
             else
               echo "::warning::Notarize secrets missing — signed but not notarized (Gatekeeper still blocks)"
