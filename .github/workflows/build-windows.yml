@@ -61,7 +61,6 @@ jobs:
           tag_name: latest
           name: floofy.exe (rolling latest)
           files: client/dist/floofy.exe
-          prerelease: true
           make_latest: true
           body: |
             Build automático do último commit em `main`.
