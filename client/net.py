@@ -123,10 +123,14 @@ class TunnelClient:
         try:
             method = env.get("method", "GET")
             path = env.get("path", "/")
-            url = f"http://127.0.0.1:{self.port}{path}"
+            url = f"http://localhost:{self.port}{path}"
             headers = {k: v[0] for k, v in (env.get("headers") or {}).items() if v}
             headers.pop("Host", None)
             headers.pop("host", None)
+            headers.pop("Origin", None)
+            headers.pop("origin", None)
+            headers.pop("Referer", None)
+            headers.pop("referer", None)
             body = base64.b64decode(env.get("body") or "")
             resp = await http.request(
                 method, url, headers=headers, content=body or None
