@@ -117,12 +117,14 @@ func writeAdminIndex(w http.ResponseWriter, root string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprintf(w, `<!doctype html><meta charset=utf-8><title>floofy-sun</title>
 <style>body{font-family:system-ui;max-width:520px;margin:80px auto;padding:0 24px;color:#222}
-code{background:#f3f3f3;padding:2px 6px;border-radius:4px}</style>
+code{background:#f3f3f3;padding:2px 6px;border-radius:4px}
+a{color:#d97706}</style>
 <h1>floofy-sun 🌞</h1>
-<p>Servidor de túnel/publish pra <code>*.%s</code>.</p>
+<p>Endpoint da API que roda atrás de <code>*.%s</code>.</p>
+<p>Pra ver como funciona, abra <a href="https://%s">%s</a>.</p>
 <ul>
   <li><code>POST /publish/</code> — upload de build estático (multipart: <code>file</code>, <code>friendly</code>)</li>
   <li><code>GET /tunnel/</code> — WebSocket reverso (query: <code>friendly</code>)</li>
   <li><code>GET /health</code> — liveness</li>
-</ul>`, root)
+</ul>`, root, root, root)
 }
