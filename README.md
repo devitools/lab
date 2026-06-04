@@ -3,53 +3,49 @@
 Túnel reverso + publicação estática caseira pra `*.devi.tools`.
 
 - **Documentação amigável** (pra mandar pra alguém usar): <https://lab.devi.tools>
-- **Download floofy** — [Windows](https://github.com/devitools/lab/releases/download/latest/floofy.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/floofy-macos.zip)
+- **Download lab** — [Windows](https://github.com/devitools/lab/releases/download/latest/lab.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/lab-macos.zip)
 
 ## Como funciona (visão simples)
 
 A ideia é deixar fácil pegar um projeto que tá rodando só no seu PC e
 gerar uma URL pública que qualquer um pode abrir no navegador.
 
-Você abre o `floofy.exe` no Windows e escolhe um dos dois modos:
+Você abre o `lab.exe` no Windows e escolhe um dos dois modos:
 
 ```
-       MEU PC (Windows)                               SERVIDOR (devi.tools)
-  ┌───────────────────────────┐                ┌──────────────────────────────┐
-  │                           │                │                              │
-  │     ┌───────────────┐     │                │      ┌────────────────┐      │
-  │     │  floofy.exe   │     │                │      │  floofy-sun 🌞 │      │
-  │     └───────┬───────┘     │                │      └────────┬───────┘      │
-  │             │             │                │               │              │
-  │   ┌─────────┴─────────┐   │                │               │              │
-  │   │                   │   │                │               │              │
-  │   ▼                   ▼   │                │               ▼              │
-  │ [Publicar]      [Conectar]│                │       *.devi.tools           │
-  │  pasta            porta   │                │     (URL pública             │
-  │   │                 │     │                │      com HTTPS)              │
-  │   │                 │     │                │               │              │
-  │   ▼                 ▼     │                │               │              │
-  │ dist/         localhost   │                │               │              │
-  │ (build)       :5173       │                │               │              │
-  │   │                 │     │                │               │              │
-  └───┼─────────────────┼─────┘                └───────────────┼──────────────┘
-      │                 │                                      │
-      │ zip via HTTPS   │ túnel WebSocket                      │
-      └────►────────────┴──────►──────────────────────────►────┘
-              (uma vez)         (enquanto o floofy           o amigo abre
-                                 estiver aberto)             <slug>.devi.tools
-
-                                                                    ▼
-
-                                                         ┌──────────────────┐
-                                                         │  amigo da filha  │
-                                                         │     (chrome)     │
-                                                         └──────────────────┘
+       MEU COMPUTADOR                              SERVIDOR (devi.tools)
+  ┌─────────────────────────┐               ┌────────────────────────────┐
+  │                         │               │                            │
+  │    ┌───────────────┐    │               │     ┌──────────────────┐   │
+  │    │      lab      │    │               │     │     lab 🌞       │   │
+  │    └───────┬───────┘    │               │     └─────────┬────────┘   │
+  │            │            │               │               │            │
+  │   ┌────────┴────────┐   │               │               │            │
+  │   │                 │   │               │               │            │
+  │   ▼                 ▼   │               │               ▼            │
+  │ [Publicar]   [Conectar] │               │         *.devi.tools       │
+  │   │                 │   │               │       (URL pública,        │
+  │   ▼                 ▼   │               │        HTTPS automático)   │
+  │ pasta         localhost │               │               │            │
+  │ do site         :5500   │               │               │            │
+  │   │                 │   │               │               │            │
+  └───┼─────────────────┼───┘               └───────────────┼────────────┘
+      │                 │                                   │
+      │  zip via HTTPS  │   túnel WebSocket persistente     │
+      └─►───────────────┴──────►─────────────────────►──────┘
+          (uma vez)         (enquanto o lab              o amigo abre
+                             estiver aberto)              <slug>.devi.tools
+                                                                ▼
+                                                       ┌──────────────────┐
+                                                       │   amigo dela     │
+                                                       │     (chrome)     │
+                                                       └──────────────────┘
 ```
 
 ### Modo "Publicar pasta" (build estático)
 
 1. Rodar o build do projeto: `npm run build` (Vite, React, Vue, etc.).
-2. Abrir `floofy.exe`, aba **Publicar pasta**.
+2. Abrir `lab.exe`, aba **Publicar pasta**.
 3. Escolher a pasta `dist/` (ou `build/`).
 4. Opcional: digitar um nome amigável (ex: `meu-tcc`).
 5. Clicar **Publicar**.
@@ -63,13 +59,13 @@ Exemplo de URL: `https://meu-tcc-h7k2nq.devi.tools`
 ### Modo "Conectar porta" (dev server ao vivo)
 
 1. Rodar o dev server: `npm run dev` (Vite costuma usar porta `5173`).
-2. Abrir `floofy.exe`, aba **Conectar porta**.
+2. Abrir `lab.exe`, aba **Conectar porta**.
 3. Digitar a porta (ex: `5173`).
 4. Opcional: nome amigável.
 5. Clicar **Conectar**.
 6. Copiar a URL e mandar pro amigo.
 
-A URL fica ativa **enquanto o floofy.exe tiver aberto**. Fecha o app =
+A URL fica ativa **enquanto o lab.exe tiver aberto**. Fecha o app =
 URL cai. Bom pra mostrar mudança ao vivo (a tela do amigo atualiza
 junto com a sua quando você salva o código).
 
@@ -107,13 +103,13 @@ Outros: ver [client/README.md](client/README.md).
 
 ## Componentes do projeto
 
-- [`server/`](server/) — serviço Go (`floofy-sun`) que roda na VPS
+- [`server/`](server/) — serviço Go (`lab`) que roda na VPS
   `devi.tools`. Recebe uploads, mantém túneis WebSocket reversos,
   roteia `<slug>.devi.tools` pro destino certo.
 - [`client/`](client/) — app Windows (Python + Tkinter empacotado em
   `.exe`) com as duas abas. Build via `client/build.bat`.
 - [`docs/`](docs/) — landing pública em <https://lab.devi.tools>
-  (GitHub Pages, custom domain via CNAME).
+  (embutida no binário do server via `go:embed` no build).
 
 ## Decisões de arquitetura
 
@@ -122,6 +118,6 @@ Outros: ver [client/README.md](client/README.md).
 | Subdomínio raiz | `*.devi.tools` (regex VIRTUAL_HOST, match exato vence pra subdomínios já cadastrados) |
 | Cert | Wildcard `*.devi.tools` via certbot DNS-01 (DO API), renova semanal via cron |
 | Auth | Slug aleatório `<friendly>-<rand6>` ~30 bits (sem token) |
-| Storage estático | `/home/heimdall/floofy/sites/<slug>/` |
+| Storage estático | `/projects/lab.devi.tools/app/server/sites/<slug>/` |
 | GC estático | 30 dias sem acesso → registry remove |
-| Admin endpoint | `floofy.devi.tools` (`/publish`, `/tunnel`, `/health`) |
+| Admin endpoint | `lab.devi.tools` (`/publish`, `/tunnel`, `/health`) |

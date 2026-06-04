@@ -1,5 +1,5 @@
 @echo off
-REM Builda floofy.exe (Windows).
+REM Builda lab.exe (Windows).
 REM Pré-requisito: Python 3.11+ no PATH.
 
 setlocal
@@ -13,8 +13,8 @@ call .venv\Scripts\activate.bat
 pip install --upgrade pip
 pip install -r requirements.txt pyinstaller
 
-pyinstaller --onefile --windowed --name floofy --collect-all websockets app.py
+pyinstaller --onefile --windowed --name lab --collect-all websockets --collect-all certifi app.py
 
 echo.
-echo Build finalizado: dist\floofy.exe
+echo Build finalizado: dist\lab.exe
 endlocal

@@ -1,4 +1,4 @@
-"""Rede: upload de zip e loop de tunnel WebSocket reverso."""
+"""Rede do client lab: upload de zip e loop de tunnel WebSocket reverso."""
 import asyncio
 import base64
 import io
@@ -149,7 +149,7 @@ class TunnelClient:
                 "status": 502,
                 "headers": {"Content-Type": ["text/plain; charset=utf-8"]},
                 "body": base64.b64encode(
-                    f"floofy local proxy error: {e}".encode()
+                    f"lab local proxy error: {e}".encode()
                 ).decode(),
             }
         try:

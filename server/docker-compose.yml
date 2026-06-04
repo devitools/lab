@@ -1,21 +1,21 @@
 version: '3.7'
 
 services:
-  floofy-sun:
+  lab:
     build:
       context: ..
       dockerfile: server/Dockerfile
-    container_name: floofy-sun
+    container_name: lab
     restart: unless-stopped
     networks:
       - reverse-proxy
     volumes:
       - ./sites:/srv/sites
     environment:
-      - FLOOFY_ROOT_DOMAIN=devi.tools
-      - FLOOFY_ADMIN_HOST=floofy.devi.tools
-      - FLOOFY_SITES_DIR=/srv/sites
-      - FLOOFY_LISTEN=:8080
+      - LAB_ROOT_DOMAIN=devi.tools
+      - LAB_ADMIN_HOST=lab.devi.tools
+      - LAB_SITES_DIR=/srv/sites
+      - LAB_LISTEN=:8080
       - VIRTUAL_HOST=~^[a-z0-9-]+\.devi\.tools$$
       - VIRTUAL_PORT=8080
       - CERT_NAME=wildcard

@@ -1,4 +1,4 @@
-name: build floofy
+name: build lab
 
 on:
   push:
@@ -20,11 +20,11 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact_name: floofy-windows
-            artifact_path: client/dist/floofy.exe
+            artifact_name: lab-windows
+            artifact_path: client/dist/lab.exe
           - os: macos-latest
-            artifact_name: floofy-macos
-            artifact_path: client/floofy-macos.zip
+            artifact_name: lab-macos
+            artifact_path: client/lab-macos.zip
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
       - name: build windows
         if: matrix.os == 'windows-latest'
         working-directory: client
-        run: pyinstaller --onefile --windowed --name floofy --collect-all websockets --collect-all certifi app.py
+        run: pyinstaller --onefile --windowed --name lab --collect-all websockets --collect-all certifi app.py
 
       - name: build macos
         if: matrix.os == 'macos-latest'
@@ -55,8 +55,8 @@ jobs:
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
         run: |
-          pyinstaller --windowed --name floofy \
-            --osx-bundle-identifier com.devitools.floofy \
+          pyinstaller --windowed --name lab \
+            --osx-bundle-identifier com.devitools.lab \
             --collect-all websockets --collect-all certifi \
             app.py
 
@@ -75,9 +75,9 @@ jobs:
               --options runtime \
               --entitlements entitlements.plist \
               --sign "$APPLE_SIGNING_IDENTITY" \
-              dist/floofy.app
+              dist/lab.app
 
-            codesign --verify --deep --strict --verbose=2 dist/floofy.app
+            codesign --verify --deep --strict --verbose=2 dist/lab.app
             echo "::endgroup::"
 
             if [ -n "$APPLE_API_KEY_CONTENT" ] && [ -n "$APPLE_API_KEY" ] && [ -n "$APPLE_API_ISSUER" ]; then
@@ -86,24 +86,24 @@ jobs:
               KEY_PATH="$HOME/private_keys/AuthKey_${APPLE_API_KEY}.p8"
               echo "$APPLE_API_KEY_CONTENT" > "$KEY_PATH"
 
-              ditto -c -k --sequesterRsrc --keepParent dist/floofy.app /tmp/floofy-notarize.zip
-              xcrun notarytool submit /tmp/floofy-notarize.zip \
+              ditto -c -k --sequesterRsrc --keepParent dist/lab.app /tmp/lab-notarize.zip
+              xcrun notarytool submit /tmp/lab-notarize.zip \
                 --key "$KEY_PATH" \
                 --key-id "$APPLE_API_KEY" \
                 --issuer "$APPLE_API_ISSUER" \
                 --wait
 
-              xcrun stapler staple dist/floofy.app
+              xcrun stapler staple dist/lab.app
               echo "::endgroup::"
             else
-              echo "::warning::Notarize secrets missing — assinado mas sem notarização (Gatekeeper ainda bloqueia)"
+              echo "::warning::Notarize secrets missing — signed but not notarized (Gatekeeper still blocks)"
             fi
           else
-            echo "::warning::Signing secrets missing — build não assinado (Gatekeeper bloqueia)"
+            echo "::warning::Signing secrets missing — unsigned build (Gatekeeper blocks)"
           fi
 
-          cd dist && ditto -c -k --sequesterRsrc --keepParent floofy.app ../floofy-macos.zip
-          ls -la ../floofy-macos.zip
+          cd dist && ditto -c -k --sequesterRsrc --keepParent lab.app ../lab-macos.zip
+          ls -la ../lab-macos.zip
 
       - uses: actions/upload-artifact@v4
         with:
@@ -128,22 +128,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: floofy (rolling latest)
+          name: lab (rolling latest)
           files: |
-            artifacts/floofy-windows/floofy.exe
-            artifacts/floofy-macos/floofy-macos.zip
+            artifacts/lab-windows/lab.exe
+            artifacts/lab-macos/lab-macos.zip
           make_latest: true
           body: |
-            Build automático do último commit em `main`.
+            Automatic build from the latest commit on `main`.
 
-            - **Windows**: baixar `floofy.exe`
-            - **macOS** (Apple Silicon): baixar `floofy-macos.zip`, descompactar, mover `floofy.app` pra Aplicativos. Na primeira abertura, click-direito → Abrir (Gatekeeper bloqueia binários sem assinatura).
+            - **Windows**: download `lab.exe`
+            - **macOS** (Apple Silicon): download `lab-macos.zip`, unzip, move `lab.app` to Applications. If the build is signed + notarized, double-click to open. Otherwise right-click → Open (Gatekeeper blocks unsigned binaries).
 
       - name: tagged release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/floofy-windows/floofy.exe
-            artifacts/floofy-macos/floofy-macos.zip
+            artifacts/lab-windows/lab.exe
+            artifacts/lab-macos/lab-macos.zip
           generate_release_notes: true

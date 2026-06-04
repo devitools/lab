@@ -1,4 +1,4 @@
-"""floofy — app pra publicar projetos locais em *.lab.devi.tools."""
+"""lab — app pra publicar projetos locais em *.devi.tools."""
 import queue
 import threading
 import tkinter as tk
@@ -9,7 +9,7 @@ import config
 import net
 
 
-APP_TITLE = "floofy"
+APP_TITLE = "lab"
 PAD = 12
 
 

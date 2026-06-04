@@ -1,4 +1,4 @@
-# floofy (client)
+# lab (client)
 
 App Windows pra publicar projetos locais em `*.devi.tools`.
 
@@ -10,13 +10,13 @@ Pré-requisito: **Python 3.11+** instalado e no PATH (`py --version` no Windows 
 build.bat
 ```
 
-Saída: `dist\floofy.exe` (~15MB, single-file, sem dependência externa).
+Saída: `dist\lab.exe` (~15MB, single-file, sem dependência externa).
 
 ## Como usar
 
 ### Modo "Publicar pasta"
 1. Rodar o build do projeto (`npm run build`, `vite build`, etc.).
-2. Abrir o floofy, aba **Publicar pasta**.
+2. Abrir o lab, aba **Publicar pasta**.
 3. Escolher a pasta `dist/` gerada.
 4. Opcional: digitar um nome amigável (ex: `meu-tcc`).
 5. Clicar **Publicar**.
@@ -26,13 +26,13 @@ Build estático fica salvo em `<slug>.devi.tools` por 30 dias (renova quando ace
 
 ### Modo "Conectar porta"
 1. Rodar o dev server local (`npm run dev`, etc.).
-2. Abrir o floofy, aba **Conectar porta**.
+2. Abrir o lab, aba **Conectar porta**.
 3. Informar a porta (ex: `5173` pro Vite).
 4. Opcional: nome amigável.
 5. Clicar **Conectar**.
 6. Copiar a URL e mandar pro amigo.
 
-URL fica ativa **enquanto o floofy estiver rodando**. Fechar = derruba o túnel.
+URL fica ativa **enquanto o lab estiver rodando**. Fechar = derruba o túnel.
 
 ## Pegadinha: dev server precisa aceitar Host externo
 

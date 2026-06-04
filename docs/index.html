@@ -160,28 +160,28 @@
   <p class="sub">URL pública pro seu projeto local em 1 clique.</p>
 
   <p>
-    O <strong>floofy.exe</strong> é um appzinho que roda no seu Windows e
+    O <strong>lab.exe</strong> é um appzinho que roda no seu Windows e
     transforma um projeto que tá só na sua máquina numa URL que qualquer
     amigo pode abrir no navegador, com HTTPS e tudo. Dois jeitos de usar:
   </p>
 
   <div style="margin: 24px 0 32px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-    <a href="https://github.com/devitools/lab/releases/download/latest/floofy.exe"
+    <a href="https://github.com/devitools/lab/releases/download/latest/lab.exe"
        style="display: inline-block; background: var(--accent); color: white;
               padding: 12px 20px; border-radius: 8px; font-weight: 600;
               text-decoration: none;">
-      ⬇ Windows&nbsp;·&nbsp;floofy.exe
+      ⬇ Windows&nbsp;·&nbsp;lab.exe
     </a>
-    <a href="https://github.com/devitools/lab/releases/download/latest/floofy-macos.zip"
+    <a href="https://github.com/devitools/lab/releases/download/latest/lab-macos.zip"
        style="display: inline-block; background: var(--ink); color: white;
               padding: 12px 20px; border-radius: 8px; font-weight: 600;
               text-decoration: none;">
-      ⬇ macOS&nbsp;·&nbsp;floofy.app
+      ⬇ macOS&nbsp;·&nbsp;lab.app
     </a>
     <span style="color: var(--muted); font-size: 13px; flex-basis: 100%;">
       Windows: single-file, dois cliques.
       macOS (Apple Silicon): descompactar e mover pra Aplicativos. Na 1ª
-      abertura, click-direito no <code>floofy.app</code> → Abrir
+      abertura, click-direito no <code>lab.app</code> → Abrir
       (Gatekeeper bloqueia apps não assinados).
     </span>
   </div>
@@ -192,7 +192,7 @@
     <div class="card">
       <h3>📤 Publicar pasta</h3>
       <ol>
-        <li>Abrir o floofy</li>
+        <li>Abrir o lab</li>
         <li>Escolher a pasta do projeto (com <code>index.html</code> dentro)</li>
         <li>Clicar <strong>Publicar</strong></li>
         <li>Copiar a URL e mandar pro amigo</li>
@@ -217,13 +217,13 @@
               <code>python -m http.server 5500</code></li>
           </ul>
         </li>
-        <li>Abrir o floofy</li>
+        <li>Abrir o lab</li>
         <li>Digitar a porta</li>
         <li>Clicar <strong>Conectar</strong></li>
         <li>Copiar a URL e mandar pro amigo</li>
       </ol>
       <div class="when">
-        Funciona <strong>enquanto o floofy tiver aberto</strong>.
+        Funciona <strong>enquanto o lab tiver aberto</strong>.
         Fechou = caiu. Mas mostra mudanças ao vivo.
       </div>
     </div>
@@ -252,7 +252,7 @@
       <h3>📤 Publicar + build</h3>
       <ol>
         <li>Rodar <code>npm run build</code></li>
-        <li>No floofy, escolher a pasta <code>dist/</code> (ou <code>build/</code>) gerada</li>
+        <li>No lab, escolher a pasta <code>dist/</code> (ou <code>build/</code>) gerada</li>
         <li>Publicar normal</li>
       </ol>
     </div>
@@ -263,7 +263,7 @@
         <li>Rodar <code>npm run dev</code></li>
         <li>Porta varia: Vite <code>5173</code>, CRA <code>3000</code>,
             Next <code>3000</code></li>
-        <li>No floofy, digitar essa porta e Conectar</li>
+        <li>No lab, digitar essa porta e Conectar</li>
       </ol>
     </div>
   </div>
@@ -292,7 +292,7 @@
 
   <div class="pitfall">
     <strong>WebStorm built-in</strong> coloca o nome do projeto no caminho
-    (ex: <code>localhost:63342/meu-site/index.html</code>). No floofy a
+    (ex: <code>localhost:63342/meu-site/index.html</code>). No lab a
     URL fica <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quiser
     sem esse prefixo, prefira <code>python -m http.server</code>.
   </div>
@@ -304,7 +304,7 @@
   ┌─────────────────────────┐               ┌────────────────────────────┐
   │                         │               │                            │
   │    ┌───────────────┐    │               │     ┌──────────────────┐   │
-  │    │    floofy     │    │               │     │   floofy-sun 🌞  │   │
+  │    │      lab      │    │               │     │     lab 🌞       │   │
   │    └───────┬───────┘    │               │     └─────────┬────────┘   │
   │            │            │               │               │            │
   │   ┌────────┴────────┐   │               │               │            │
@@ -320,8 +320,8 @@
       │                 │                                   │
       │  zip via HTTPS  │   túnel WebSocket persistente     │
       └─►───────────────┴──────►─────────────────────►──────┘
-          (uma vez)         (enquanto o floofy            o amigo abre
-                             estiver aberto)                &lt;slug&gt;.devi.tools
+          (uma vez)         (enquanto o lab              o amigo abre
+                             estiver aberto)              &lt;slug&gt;.devi.tools
                                                                 ▼
                                                        ┌──────────────────┐
                                                        │   amigo dela     │
@@ -345,8 +345,8 @@
   <footer>
     Código aberto em
     <a href="https://github.com/devitools/lab">github.com/devitools/lab</a>.
-    Servidor: <code>floofy-sun</code> (Go).
-    Cliente: <code>floofy.exe</code> (Python + Tkinter).
+    Servidor: <code>lab</code> (Go).
+    Cliente: <code>lab.exe</code> (Python + Tkinter).
   </footer>
 
 </div>

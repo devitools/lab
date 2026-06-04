@@ -18,11 +18,11 @@ import (
 
 func main() {
 	cfg := server.Config{
-		Listen:       envOr("FLOOFY_LISTEN", ":8080"),
-		RootDomain:   envOr("FLOOFY_ROOT_DOMAIN", "lab.devi.tools"),
-		AdminHost:    envOr("FLOOFY_ADMIN_HOST", "floofy.lab.devi.tools"),
-		SitesDir:     envOr("FLOOFY_SITES_DIR", "/srv/sites"),
-		MaxUploadMB:  50,
+		Listen:        envOr("LAB_LISTEN", ":8080"),
+		RootDomain:    envOr("LAB_ROOT_DOMAIN", "devi.tools"),
+		AdminHost:     envOr("LAB_ADMIN_HOST", "lab.devi.tools"),
+		SitesDir:      envOr("LAB_SITES_DIR", "/srv/sites"),
+		MaxUploadMB:   50,
 		TunnelTimeout: 30 * time.Second,
 	}
 
@@ -49,7 +49,7 @@ func main() {
 	go reg.RunGC(context.Background(), time.Hour, 30*24*time.Hour)
 
 	go func() {
-		log.Printf("floofy-sun listening on %s, root=%s admin=%s", cfg.Listen, cfg.RootDomain, cfg.AdminHost)
+		log.Printf("lab listening on %s, root=%s admin=%s", cfg.Listen, cfg.RootDomain, cfg.AdminHost)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("listen: %v", err)
 		}

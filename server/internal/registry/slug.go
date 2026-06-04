@@ -16,9 +16,9 @@ const (
 )
 
 var reservedFriendly = map[string]bool{
-	"lab": true, "docs": true, "floofy": true, "www": true,
-	"api": true, "mail": true, "ftp": true, "smtp": true,
-	"admin": true, "root": true, "dev": true, "staging": true,
+	"lab": true, "docs": true, "www": true, "api": true,
+	"mail": true, "ftp": true, "smtp": true, "admin": true,
+	"root": true, "dev": true, "staging": true,
 }
 
 func NewSlug(friendly string) (string, error) {

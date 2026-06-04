@@ -17,9 +17,9 @@ import (
 var docsLanding []byte
 
 var reservedSlugs = map[string]bool{
-	"lab": true, "docs": true, "floofy": true, "www": true,
-	"api": true, "mail": true, "ftp": true, "smtp": true,
-	"admin": true, "root": true, "dev": true, "staging": true,
+	"lab": true, "docs": true, "www": true, "api": true,
+	"mail": true, "ftp": true, "smtp": true, "admin": true,
+	"root": true, "dev": true, "staging": true,
 }
 
 type Config struct {
@@ -56,10 +56,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if slug == "lab" || slug == "docs" {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Cache-Control", "public, max-age=300")
-		_, _ = w.Write(docsLanding)
+	if slug == "docs" {
+		writeDocsLanding(w)
 		return
 	}
 
@@ -99,7 +97,7 @@ func (s *Server) serveAdmin(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/tunnel/" || r.URL.Path == "/tunnel":
 		s.tunnel.Accept(w, r, s.cfg.RootDomain)
 	case r.URL.Path == "/":
-		writeAdminIndex(w, s.cfg.RootDomain)
+		writeDocsLanding(w)
 	default:
 		http.NotFound(w, r)
 	}
@@ -124,6 +122,12 @@ func stripPort(host string) string {
 	return host
 }
 
+func writeDocsLanding(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=300")
+	_, _ = w.Write(docsLanding)
+}
+
 func writeMissingLab(w http.ResponseWriter, slug, root string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusNotFound)
@@ -133,20 +137,4 @@ h1{font-size:24px;margin:0 0 8px}code{background:#f3f3f3;padding:2px 6px;border-
 <h1>lab não encontrado 🐾</h1>
 <p>O lab <code>%s.%s</code> não está no ar agora.</p>
 <p>Ele pode ter expirado, sido apagado, ou nunca ter existido.</p>`, slug, root)
-}
-
-func writeAdminIndex(w http.ResponseWriter, root string) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprintf(w, `<!doctype html><meta charset=utf-8><title>floofy-sun</title>
-<style>body{font-family:system-ui;max-width:520px;margin:80px auto;padding:0 24px;color:#222}
-code{background:#f3f3f3;padding:2px 6px;border-radius:4px}
-a{color:#d97706}</style>
-<h1>floofy-sun 🌞</h1>
-<p>Endpoint da API que roda atrás de <code>*.%s</code>.</p>
-<p>Pra ver como funciona, abra <a href="https://lab.%s">lab.%s</a>.</p>
-<ul>
-  <li><code>POST /publish/</code> — upload de build estático (multipart: <code>file</code>, <code>friendly</code>)</li>
-  <li><code>GET /tunnel/</code> — WebSocket reverso (query: <code>friendly</code>)</li>
-  <li><code>GET /health</code> — liveness</li>
-</ul>`, root, root, root)
 }
