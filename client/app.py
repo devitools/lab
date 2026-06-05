@@ -13,7 +13,7 @@ APP_TITLE = "lab"
 PAD = 14
 
 STATES = {
-    "off":          ("Desconectado",   "#888"),
+    "off":          ("Pronto",         "#888"),
     "idle":         ("Pronto",         "#888"),
     "connecting":   ("Conectando…",    "#e8a500"),
     "up":           ("No ar",          "#1aa051"),
@@ -26,8 +26,8 @@ class App:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title(APP_TITLE)
-        root.geometry("520x460")
-        root.minsize(520, 460)
+        root.geometry("540x520")
+        root.minsize(540, 520)
 
         style = ttk.Style()
         if "aqua" in style.theme_names():
@@ -38,6 +38,7 @@ class App:
         self.events: queue.Queue = queue.Queue()
         self.tunnel_thread: threading.Thread | None = None
         self.tunnel_client: net.TunnelClient | None = None
+        self._lockable: list = []
 
         self.mode_var = tk.StringVar(value="folder")
 
@@ -46,69 +47,72 @@ class App:
         outer.columnconfigure(0, weight=1)
 
         # ── Mode selector ────────────────────────────────────────────────
-        mode_box = ttk.Frame(outer)
-        mode_box.grid(row=0, column=0, sticky="ew", pady=(0, 12))
-        ttk.Label(mode_box, text="O que você quer compartilhar?", foreground="#888").pack(anchor="w", pady=(0, 6))
-        radios = ttk.Frame(mode_box)
-        radios.pack(anchor="w")
-        ttk.Radiobutton(
+        ttk.Label(outer, text="O que você quer compartilhar?", foreground="#888").grid(row=0, column=0, sticky="w")
+        radios = ttk.Frame(outer)
+        radios.grid(row=1, column=0, sticky="w", pady=(4, 12))
+        rb_folder = ttk.Radiobutton(
             radios, text="Uma pasta",
             variable=self.mode_var, value="folder",
             command=self._on_mode_change,
-        ).pack(side="left", padx=(0, 16))
-        ttk.Radiobutton(
+        )
+        rb_folder.pack(side="left", padx=(0, 16))
+        rb_port = ttk.Radiobutton(
             radios, text="Uma porta local",
             variable=self.mode_var, value="port",
             command=self._on_mode_change,
-        ).pack(side="left")
+        )
+        rb_port.pack(side="left")
+        self._lockable.extend([rb_folder, rb_port])
 
-        ttk.Separator(outer, orient="horizontal").grid(row=1, column=0, sticky="ew", pady=(0, 12))
+        ttk.Separator(outer, orient="horizontal").grid(row=2, column=0, sticky="ew", pady=(0, 12))
 
         # ── Body (swappable) ─────────────────────────────────────────────
         self.body = ttk.Frame(outer)
-        self.body.grid(row=2, column=0, sticky="ew")
+        self.body.grid(row=3, column=0, sticky="ew")
         self.body.columnconfigure(0, weight=1)
 
         self.folder_view = FolderView(self.body, self)
         self.port_view = PortView(self.body, self)
 
         # ── Friendly name (shared) ───────────────────────────────────────
-        ttk.Label(outer, text="Nome amigável (opcional)").grid(row=3, column=0, sticky="w", pady=(12, 2))
+        ttk.Label(outer, text="Nome amigável (opcional)").grid(row=4, column=0, sticky="w", pady=(12, 2))
         self.friendly_var = tk.StringVar()
-        ttk.Entry(outer, textvariable=self.friendly_var).grid(row=4, column=0, sticky="ew")
+        self.friendly_entry = ttk.Entry(outer, textvariable=self.friendly_var)
+        self.friendly_entry.grid(row=5, column=0, sticky="ew")
+        self._lockable.append(self.friendly_entry)
 
-        # ── Action button (shared) ───────────────────────────────────────
-        self.action_btn = ttk.Button(outer, text="Compartilhar", command=self.toggle)
-        self.action_btn.grid(row=5, column=0, sticky="ew", pady=(12, 0))
+        ttk.Separator(outer, orient="horizontal").grid(row=6, column=0, sticky="ew", pady=14)
 
-        # ── Shared status + URL output ───────────────────────────────────
-        ttk.Separator(outer, orient="horizontal").grid(row=6, column=0, sticky="ew", pady=12)
-
-        status_row = ttk.Frame(outer)
-        status_row.grid(row=7, column=0, sticky="ew")
-        status_row.columnconfigure(1, weight=1)
-        self.status_dot = tk.Canvas(status_row, width=14, height=14, highlightthickness=0)
-        self.status_dot.grid(row=0, column=0, padx=(0, 6))
-        self.status_label = ttk.Label(status_row, text="Pronto", foreground="#888")
-        self.status_label.grid(row=0, column=1, sticky="w")
-        self._draw_dot("#888")
-
-        ttk.Label(outer, text="URL pública", foreground="#888").grid(row=8, column=0, sticky="w", pady=(10, 2))
+        # ── Result block (URL + status) ──────────────────────────────────
+        ttk.Label(outer, text="URL pública", foreground="#888").grid(row=7, column=0, sticky="w", pady=(0, 2))
 
         self.url_var = tk.StringVar()
         url_row = ttk.Frame(outer)
-        url_row.grid(row=9, column=0, sticky="ew")
+        url_row.grid(row=8, column=0, sticky="ew")
         url_row.columnconfigure(0, weight=1)
         self.url_entry = ttk.Entry(url_row, textvariable=self.url_var, state="readonly")
         self.url_entry.grid(row=0, column=0, sticky="ew")
         ttk.Button(url_row, text="Copiar", command=self.copy_url, width=8).grid(row=0, column=1, padx=(6, 0))
         ttk.Button(url_row, text="Abrir", command=self.open_url, width=8).grid(row=0, column=2, padx=(6, 0))
 
+        status_row = ttk.Frame(outer)
+        status_row.grid(row=9, column=0, sticky="ew", pady=(6, 12))
+        status_row.columnconfigure(1, weight=1)
+        self.status_dot = tk.Canvas(status_row, width=12, height=12, highlightthickness=0)
+        self.status_dot.grid(row=0, column=0, padx=(0, 6))
+        self.status_label = ttk.Label(status_row, text="Pronto", foreground="#888")
+        self.status_label.grid(row=0, column=1, sticky="w")
+        self._draw_dot("#888")
+
+        # ── Action button (bottom) ───────────────────────────────────────
+        self.action_btn = ttk.Button(outer, text="Compartilhar", command=self.toggle)
+        self.action_btn.grid(row=10, column=0, sticky="ew", ipady=4)
+
         self.error_var = tk.StringVar()
         ttk.Label(
             outer, textvariable=self.error_var,
             foreground="#cc3333", wraplength=480,
-        ).grid(row=10, column=0, sticky="ew", pady=(8, 0))
+        ).grid(row=11, column=0, sticky="ew", pady=(8, 0))
 
         # Footer
         ttk.Label(
@@ -144,12 +148,14 @@ class App:
 
     def connect(self):
         mode = self.mode_var.get()
+        index_file = "index.html"
         try:
             if mode == "folder":
                 target = self.folder_view.path_var.get().strip()
                 if not target:
                     messagebox.showerror(APP_TITLE, "Escolha a pasta primeiro.")
                     return
+                index_file = self.folder_view.index_var.get().strip() or "index.html"
             else:
                 target = int(self.port_view.port_var.get())
                 if not 1 <= target <= 65535:
@@ -170,7 +176,9 @@ class App:
             self.events.put((kind, payload))
 
         try:
-            self.tunnel_client = net.TunnelClient(mode, target, friendly, emit)
+            self.tunnel_client = net.TunnelClient(
+                mode, target, friendly, emit, index_file=index_file,
+            )
         except ValueError as e:
             self.set_state("error")
             self.error_var.set(str(e))
@@ -188,23 +196,16 @@ class App:
 
     def _lock_inputs(self, locked: bool):
         state = "disabled" if locked else "normal"
-        for rb in self._radio_buttons():
-            rb.config(state=state)
-
-    def _radio_buttons(self):
-        # Find the radio buttons via the body's grandparent
-        return [w for w in self._find_widgets(self.root, ttk.Radiobutton)]
-
-    def _find_widgets(self, parent, cls):
-        for child in parent.winfo_children():
-            if isinstance(child, cls):
-                yield child
-            yield from self._find_widgets(child, cls)
+        for w in self._lockable + self.folder_view.lockable() + self.port_view.lockable():
+            try:
+                w.config(state=state)
+            except tk.TclError:
+                pass
 
     # ── Status / URL helpers ─────────────────────────────────────────────
     def _draw_dot(self, color: str):
         self.status_dot.delete("all")
-        self.status_dot.create_oval(2, 2, 12, 12, fill=color, outline="")
+        self.status_dot.create_oval(2, 2, 11, 11, fill=color, outline="")
 
     def set_state(self, state: str, detail: str = ""):
         label, color = STATES.get(state, ("", "#888"))
@@ -270,18 +271,32 @@ class FolderView:
         f = self.frame
         f.columnconfigure(0, weight=1)
 
-        ttk.Label(f, text="Pasta do projeto (com index.html dentro)").grid(row=0, column=0, sticky="w")
+        ttk.Label(f, text="Pasta do projeto").grid(row=0, column=0, sticky="w")
         self.path_var = tk.StringVar()
         path_row = ttk.Frame(f)
-        path_row.grid(row=1, column=0, sticky="ew", pady=(2, 0))
+        path_row.grid(row=1, column=0, sticky="ew", pady=(2, 12))
         path_row.columnconfigure(0, weight=1)
-        ttk.Entry(path_row, textvariable=self.path_var).grid(row=0, column=0, sticky="ew")
-        ttk.Button(path_row, text="Escolher…", command=self.pick, width=10).grid(row=0, column=1, padx=(6, 0))
+        self.path_entry = ttk.Entry(path_row, textvariable=self.path_var)
+        self.path_entry.grid(row=0, column=0, sticky="ew")
+        self.pick_btn = ttk.Button(path_row, text="Escolher…", command=self.pick, width=10)
+        self.pick_btn.grid(row=0, column=1, padx=(6, 0))
+
+        ttk.Label(f, text="Página inicial").grid(row=2, column=0, sticky="w")
+        self.index_var = tk.StringVar(value="index.html")
+        self.index_entry = ttk.Entry(f, textvariable=self.index_var)
+        self.index_entry.grid(row=3, column=0, sticky="ew", pady=(2, 0))
+        ttk.Label(
+            f, text="Arquivo servido quando o amigo abre a URL na raiz (padrão: index.html)",
+            foreground="#888", font=("", 11),
+        ).grid(row=4, column=0, sticky="w", pady=(2, 0))
 
     def pick(self):
         path = filedialog.askdirectory(title="Escolher pasta do projeto")
         if path:
             self.path_var.set(path)
+
+    def lockable(self):
+        return [self.path_entry, self.pick_btn, self.index_entry]
 
 
 class PortView:
@@ -293,13 +308,17 @@ class PortView:
 
         ttk.Label(f, text="Porta local").grid(row=0, column=0, sticky="w")
         self.port_var = tk.StringVar(value="5173")
-        ttk.Spinbox(
+        self.port_spin = ttk.Spinbox(
             f, from_=1024, to=65535, textvariable=self.port_var, width=12
-        ).grid(row=1, column=0, sticky="w", pady=(2, 4))
+        )
+        self.port_spin.grid(row=1, column=0, sticky="w", pady=(2, 4))
         ttk.Label(
             f, text="Ex.: Vite 5173 · VSCode Live Server 5500 · WebStorm 63342",
-            foreground="#888",
+            foreground="#888", font=("", 11),
         ).grid(row=2, column=0, sticky="w")
+
+    def lockable(self):
+        return [self.port_spin]
 
 
 def main():

@@ -20,11 +20,33 @@ def _ssl_context() -> ssl.SSLContext:
     return ssl.create_default_context(cafile=certifi.where())
 
 
+_TEXT_MIME_PREFIXES = ("text/",)
+_TEXT_MIME_EXACT = {
+    "application/json",
+    "application/javascript",
+    "application/xml",
+    "application/xhtml+xml",
+    "image/svg+xml",
+}
+
+
+def _content_type(filename: str) -> str:
+    ctype, _ = mimetypes.guess_type(filename)
+    if not ctype:
+        return "application/octet-stream"
+    if "charset=" in ctype.lower():
+        return ctype
+    if ctype.startswith(_TEXT_MIME_PREFIXES) or ctype in _TEXT_MIME_EXACT:
+        return f"{ctype}; charset=utf-8"
+    return ctype
+
+
 class _FolderHandler:
     """Lê arquivos diretamente do disco em resposta a envelopes do túnel."""
 
-    def __init__(self, folder: str):
+    def __init__(self, folder: str, index_file: str = "index.html"):
         self.folder = Path(folder).resolve()
+        self.index_file = (index_file or "index.html").strip() or "index.html"
 
     async def handle(self, env: dict) -> dict:
         req_id = env["id"]
@@ -42,12 +64,12 @@ class _FolderHandler:
             return _resp(req_id, 403, b"forbidden", "text/plain; charset=utf-8")
 
         if target.is_dir():
-            idx = target / "index.html"
+            idx = target / self.index_file
             if idx.is_file():
                 target = idx
 
         if not target.is_file():
-            fallback = self.folder / "index.html"
+            fallback = self.folder / self.index_file
             if fallback.is_file():
                 target = fallback
             else:
@@ -58,7 +80,7 @@ class _FolderHandler:
         except OSError as e:
             return _resp(req_id, 500, f"read error: {e}".encode(), "text/plain; charset=utf-8")
 
-        ctype = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
+        ctype = _content_type(target.name)
         body = data if method == "GET" else b""
         return _resp(req_id, 200, body, ctype, cache="no-cache")
 
@@ -110,13 +132,14 @@ class TunnelClient:
         target,
         friendly: Optional[str],
         on_event: Callable[[str, dict], None],
+        index_file: str = "index.html",
     ):
         if mode not in ("folder", "port"):
             raise ValueError(f"mode inválido: {mode}")
         if mode == "folder":
             if not target or not os.path.isdir(target):
                 raise ValueError(f"pasta inválida: {target}")
-            self.handler = _FolderHandler(str(target))
+            self.handler = _FolderHandler(str(target), index_file)
         else:
             port = int(target)
             if not 1 <= port <= 65535:
