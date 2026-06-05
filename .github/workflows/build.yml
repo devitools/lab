@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build:
@@ -25,6 +26,9 @@ jobs:
           - os: macos-latest
             artifact_name: lab-macos
             artifact_path: client/lab-macos.zip
+          - os: ubuntu-latest
+            artifact_name: lab-linux
+            artifact_path: client/lab-linux.AppImage
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +46,34 @@ jobs:
       - name: build windows
         if: matrix.os == 'windows-latest'
         working-directory: client
-        run: pyinstaller --onefile --windowed --name lab --collect-all websockets --collect-all certifi app.py
+        run: pyinstaller --onefile --windowed --name lab --collect-all websockets --collect-all certifi --collect-all sv_ttk app.py
+
+      - name: upload unsigned exe (signpath input)
+        id: unsigned-exe
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab-windows-unsigned
+          path: client/dist/lab.exe
+          retention-days: 1
+
+      - name: sign windows via SignPath
+        if: matrix.os == 'windows-latest' && vars.SIGNPATH_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORG_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_SLUG }}
+          github-artifact-id: ${{ steps.unsigned-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: client/dist
+
+      - name: signpath disabled note
+        if: matrix.os == 'windows-latest' && vars.SIGNPATH_ENABLED != 'true'
+        shell: bash
+        run: echo "::warning::SIGNPATH_ENABLED!='true' — shipping unsigned .exe (SmartScreen will warn). Set repo Variable SIGNPATH_ENABLED=true after SignPath project is approved."
 
       - name: build macos
         if: matrix.os == 'macos-latest'
@@ -57,7 +88,7 @@ jobs:
         run: |
           pyinstaller --windowed --name lab \
             --osx-bundle-identifier com.devitools.lab \
-            --collect-all websockets --collect-all certifi \
+            --collect-all websockets --collect-all certifi --collect-all sv_ttk \
             app.py
 
           if [ -n "$APPLE_SIGNING_IDENTITY" ] && [ -n "$APPLE_CERTIFICATE" ]; then
@@ -107,6 +138,40 @@ jobs:
           cd dist && ditto -c -k --sequesterRsrc --keepParent lab.app ../lab-macos.zip
           ls -la ../lab-macos.zip
 
+      - name: build linux (AppImage)
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk librsvg2-bin desktop-file-utils
+
+          pyinstaller --onefile --name lab \
+            --collect-all websockets --collect-all certifi --collect-all sv_ttk \
+            app.py
+
+          APPDIR="$PWD/AppDir"
+          rm -rf "$APPDIR"
+          mkdir -p "$APPDIR/usr/bin"
+          cp dist/lab "$APPDIR/usr/bin/lab"
+
+          rsvg-convert -w 256 -h 256 assets/lab.svg -o "$APPDIR/lab.png"
+          cp assets/lab.desktop "$APPDIR/lab.desktop"
+
+          cat > "$APPDIR/AppRun" <<'SH'
+          #!/bin/sh
+          HERE="$(dirname "$(readlink -f "$0")")"
+          exec "$HERE/usr/bin/lab" "$@"
+          SH
+          chmod +x "$APPDIR/AppRun"
+
+          curl -fsSL -o /tmp/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool
+          ( cd /tmp && ./appimagetool --appimage-extract >/dev/null )
+
+          ARCH=x86_64 /tmp/squashfs-root/AppRun --no-appstream "$APPDIR" lab-linux.AppImage
+          ls -la lab-linux.AppImage
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
@@ -134,12 +199,14 @@ jobs:
           files: |
             artifacts/lab-windows/lab.exe
             artifacts/lab-macos/lab-macos.zip
+            artifacts/lab-linux/lab-linux.AppImage
           make_latest: true
           body: |
             Automatic build from the latest commit on `main`.
 
             - **Windows**: download `lab.exe`
             - **macOS** (Apple Silicon): download `lab-macos.zip`, unzip, move `lab.app` to Applications. If the build is signed + notarized, double-click to open. Otherwise right-click → Open (Gatekeeper blocks unsigned binaries).
+            - **Linux**: download `lab-linux.AppImage`, `chmod +x lab-linux.AppImage`, then `./lab-linux.AppImage`.
 
       - name: tagged release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -148,4 +215,5 @@ jobs:
           files: |
             artifacts/lab-windows/lab.exe
             artifacts/lab-macos/lab-macos.zip
+            artifacts/lab-linux/lab-linux.AppImage
           generate_release_notes: true

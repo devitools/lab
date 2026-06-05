@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=lab
+Comment=Compartilhar pasta ou porta local em *.devi.tools
+Exec=lab
+Icon=lab
+Categories=Development;Network;
+Terminal=false

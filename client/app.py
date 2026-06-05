@@ -5,20 +5,24 @@ import tkinter as tk
 import webbrowser
 from tkinter import filedialog, messagebox, ttk
 
+import sv_ttk
+
 import config
 import net
 
 
 APP_TITLE = "lab"
-PAD = 14
+PAD = 16
+MUTED = "#9ca3af"
+ACCENT = "#a78bfa"
 
 STATES = {
-    "off":          ("",                "#888"),
-    "idle":         ("",                "#888"),
-    "connecting":   ("Conectando…",     "#e8a500"),
-    "up":           ("No ar",           "#1aa051"),
-    "reconnecting": ("Reconectando…",   "#d97506"),
-    "error":        ("Erro",            "#cc3333"),
+    "off":          ("",                MUTED),
+    "idle":         ("",                MUTED),
+    "connecting":   ("Conectando…",     "#f59e0b"),
+    "up":           ("No ar",           "#34d399"),
+    "reconnecting": ("Reconectando…",   "#f97316"),
+    "error":        ("Erro",            "#f87171"),
 }
 
 
@@ -26,14 +30,18 @@ class App:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title(APP_TITLE)
-        root.geometry("540x520")
-        root.minsize(540, 520)
+        root.geometry("580x620")
+        root.minsize(560, 600)
 
+        sv_ttk.set_theme("dark")
         style = ttk.Style()
-        if "aqua" in style.theme_names():
-            style.theme_use("aqua")
-        elif "vista" in style.theme_names():
-            style.theme_use("vista")
+        style.configure("Brand.TLabel", foreground=ACCENT, font=("TkDefaultFont", 18, "bold"))
+        style.configure("Tagline.TLabel", foreground=MUTED, font=("TkDefaultFont", 10))
+        style.configure("SectionHint.TLabel", foreground=MUTED, font=("TkDefaultFont", 10))
+        style.configure("Hint.TLabel", foreground=MUTED, font=("TkDefaultFont", 9))
+        style.configure("Footer.TLabel", foreground=MUTED, font=("TkDefaultFont", 9))
+        style.configure("Action.TButton", font=("TkDefaultFont", 11, "bold"))
+        style.configure("Status.TLabel", font=("TkDefaultFont", 10))
 
         self.events: queue.Queue = queue.Queue()
         self.tunnel_thread: threading.Thread | None = None
@@ -42,12 +50,21 @@ class App:
 
         self.mode_var = tk.StringVar(value="folder")
 
-        outer = ttk.Frame(root, padding=PAD)
+        # ── Brand (top) ──────────────────────────────────────────────────
+        brand_bar = ttk.Frame(root, padding=(PAD, PAD, PAD, 0))
+        brand_bar.pack(side="top", fill="x")
+        ttk.Label(brand_bar, text="</> lab", style="Brand.TLabel").pack(side="left")
+        ttk.Label(
+            brand_bar, text="compartilhe qualquer pasta ou porta local",
+            style="Tagline.TLabel",
+        ).pack(side="left", padx=(10, 0), pady=(8, 0))
+
+        outer = ttk.Frame(root, padding=(PAD, 12, PAD, PAD))
         outer.pack(fill="both", expand=True)
         outer.columnconfigure(0, weight=1)
 
         # ── Mode selector ────────────────────────────────────────────────
-        ttk.Label(outer, text="O que você quer compartilhar?", foreground="#888").grid(row=0, column=0, sticky="w")
+        ttk.Label(outer, text="O que você quer compartilhar?", style="SectionHint.TLabel").grid(row=0, column=0, sticky="w")
         radios = ttk.Frame(outer)
         radios.grid(row=1, column=0, sticky="w", pady=(4, 12))
         rb_folder = ttk.Radiobutton(
@@ -89,7 +106,7 @@ class App:
         self.result_frame.grid(row=7, column=0, sticky="ew")
         self.result_frame.columnconfigure(0, weight=1)
 
-        ttk.Label(self.result_frame, text="URL pública", foreground="#888").grid(row=0, column=0, sticky="w", pady=(0, 2))
+        ttk.Label(self.result_frame, text="URL pública", style="SectionHint.TLabel").grid(row=0, column=0, sticky="w", pady=(0, 2))
 
         self.url_var = tk.StringVar()
         url_row = ttk.Frame(self.result_frame)
@@ -101,29 +118,29 @@ class App:
         ttk.Button(url_row, text="Abrir", command=self.open_url, width=8).grid(row=0, column=2, padx=(6, 0))
 
         status_row = ttk.Frame(self.result_frame)
-        status_row.grid(row=2, column=0, sticky="ew", pady=(6, 12))
-        status_row.columnconfigure(1, weight=1)
-        self.status_dot = tk.Canvas(status_row, width=12, height=12, highlightthickness=0)
-        self.status_dot.grid(row=0, column=0, padx=(0, 6))
-        self.status_label = ttk.Label(status_row, text="", foreground="#888")
-        self.status_label.grid(row=0, column=1, sticky="w")
-        self._draw_dot("#888")
+        status_row.grid(row=2, column=0, sticky="ew", pady=(8, 12))
+        status_row.columnconfigure(0, weight=1)
+        self.status_label = ttk.Label(status_row, text="", foreground=MUTED, style="Status.TLabel")
+        self.status_label.grid(row=0, column=0, sticky="w")
 
         # ── Action button (bottom) ───────────────────────────────────────
-        self.action_btn = ttk.Button(outer, text="Compartilhar", command=self.toggle)
-        self.action_btn.grid(row=8, column=0, sticky="ew", ipady=4)
+        self.action_btn = ttk.Button(
+            outer, text="Compartilhar", command=self.toggle,
+            style="Accent.TButton",
+        )
+        self.action_btn.grid(row=8, column=0, sticky="ew", ipady=6)
 
         self.error_var = tk.StringVar()
         ttk.Label(
             outer, textvariable=self.error_var,
-            foreground="#cc3333", wraplength=480,
+            foreground="#f87171", wraplength=480,
         ).grid(row=9, column=0, sticky="ew", pady=(8, 0))
 
         # Footer
         ttk.Label(
             root, text=f"servidor: {config.SERVER_HOST}",
-            foreground="#888",
-        ).pack(side="bottom", pady=(0, 6))
+            style="Footer.TLabel",
+        ).pack(side="bottom", pady=(0, 8))
 
         self._on_mode_change()
         self._show_result(False)
@@ -218,16 +235,12 @@ class App:
                 pass
 
     # ── Status / URL helpers ─────────────────────────────────────────────
-    def _draw_dot(self, color: str):
-        self.status_dot.delete("all")
-        self.status_dot.create_oval(2, 2, 11, 11, fill=color, outline="")
-
     def set_state(self, state: str, detail: str = ""):
-        label, color = STATES.get(state, ("", "#888"))
+        label, color = STATES.get(state, ("", MUTED))
         if detail:
             label = f"{label} ({detail})"
-        self.status_label.config(text=label, foreground=color)
-        self._draw_dot(color)
+        text = f"●  {label}" if label else ""
+        self.status_label.config(text=text, foreground=color)
 
     def copy_url(self):
         url = self.url_var.get()
@@ -303,7 +316,7 @@ class FolderView:
         self.index_entry.grid(row=3, column=0, sticky="ew", pady=(2, 0))
         ttk.Label(
             f, text="Arquivo servido quando o amigo abre a URL na raiz (padrão: index.html)",
-            foreground="#888", font=("", 11),
+            style="Hint.TLabel",
         ).grid(row=4, column=0, sticky="w", pady=(2, 0))
 
     def pick(self):
@@ -330,7 +343,7 @@ class PortView:
         self.port_spin.grid(row=1, column=0, sticky="w", pady=(2, 4))
         ttk.Label(
             f, text="Ex.: Vite 5173 · VSCode Live Server 5500 · WebStorm 63342",
-            foreground="#888", font=("", 11),
+            style="Hint.TLabel",
         ).grid(row=2, column=0, sticky="w")
 
     def lockable(self):

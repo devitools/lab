@@ -1,3 +1,4 @@
 httpx==0.28.1
 websockets==16.0
 certifi
+sv-ttk==2.6.0

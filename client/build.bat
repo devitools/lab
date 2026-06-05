@@ -13,7 +13,7 @@ call .venv\Scripts\activate.bat
 pip install --upgrade pip
 pip install -r requirements.txt pyinstaller
 
-pyinstaller --onefile --windowed --name lab --collect-all websockets --collect-all certifi app.py
+pyinstaller --onefile --windowed --name lab --collect-all websockets --collect-all certifi --collect-all sv_ttk app.py
 
 echo.
 echo Build finalizado: dist\lab.exe
