@@ -1,6 +1,6 @@
 # lab (client)
 
-App Windows pra publicar projetos locais em `*.devi.tools`.
+App desktop pra compartilhar pasta ou porta local em `*.devi.tools` via túnel WebSocket.
 
 ## Build
 
@@ -14,27 +14,26 @@ Saída: `dist\lab.exe` (~15MB, single-file, sem dependência externa).
 
 ## Como usar
 
-### Modo "Publicar pasta"
-1. Rodar o build do projeto (`npm run build`, `vite build`, etc.).
-2. Abrir o lab, aba **Publicar pasta**.
-3. Escolher a pasta `dist/` gerada.
-4. Opcional: digitar um nome amigável (ex: `meu-tcc`).
-5. Clicar **Publicar**.
-6. Copiar a URL retornada e mandar pro amigo.
+### Modo "Uma pasta"
 
-Build estático fica salvo em `<slug>.devi.tools` por 30 dias (renova quando acessado).
+1. Abrir o lab, marcar **"Uma pasta"**.
+2. Escolher a pasta do projeto (com `index.html` dentro).
+3. Clicar **Compartilhar**.
+4. Copiar a URL retornada e mandar pro amigo.
 
-### Modo "Conectar porta"
-1. Rodar o dev server local (`npm run dev`, etc.).
-2. Abrir o lab, aba **Conectar porta**.
+O lab serve os arquivos direto do disco. Editou no editor, salvou, próxima request lê
+a versão nova.
+
+### Modo "Uma porta local"
+
+1. Rodar o dev server local (`npm run dev`, `php -S`, etc).
+2. Abrir o lab, marcar **"Uma porta local"**.
 3. Informar a porta (ex: `5173` pro Vite).
-4. Opcional: nome amigável.
-5. Clicar **Conectar**.
-6. Copiar a URL e mandar pro amigo.
+4. Clicar **Compartilhar**.
 
 URL fica ativa **enquanto o lab estiver rodando**. Fechar = derruba o túnel.
 
-## Pegadinha: dev server precisa aceitar Host externo
+## Pegadinha do modo porta: dev server precisa aceitar Host externo
 
 A maioria dos dev servers rejeita requests com Host externo por padrão.
 

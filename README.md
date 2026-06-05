@@ -1,92 +1,74 @@
 # lab
 
-Túnel reverso + publicação estática caseira pra `*.devi.tools`.
+Túnel reverso caseiro pra `*.devi.tools`. Compartilhar projetos locais em URL pública sem ngrok, sem SSH, sem cadastro.
 
-- **Documentação amigável** (pra mandar pra alguém usar): <https://lab.devi.tools>
-- **Download lab** — [Windows](https://github.com/devitools/lab/releases/download/latest/lab.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/lab-macos.zip)
+- **Documentação amigável**: <https://lab.devi.tools>
+- **Download** — [Windows](https://github.com/devitools/lab/releases/download/latest/lab.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/lab-macos.zip)
 
-## Como funciona (visão simples)
+## Como funciona
 
 A ideia é deixar fácil pegar um projeto que tá rodando só no seu PC e
 gerar uma URL pública que qualquer um pode abrir no navegador.
 
-Você abre o `lab.exe` no Windows e escolhe um dos dois modos:
+Você abre o `lab.exe` (ou `lab.app`) e escolhe entre dois modos:
 
 ```
        MEU COMPUTADOR                              SERVIDOR (devi.tools)
   ┌─────────────────────────┐               ┌────────────────────────────┐
-  │                         │               │                            │
   │    ┌───────────────┐    │               │     ┌──────────────────┐   │
-  │    │      lab      │    │               │     │     lab 🌞       │   │
+  │    │      lab      │    │               │     │       lab        │   │
   │    └───────┬───────┘    │               │     └─────────┬────────┘   │
-  │            │            │               │               │            │
-  │   ┌────────┴────────┐   │               │               │            │
+  │            │            │               │               ▼            │
+  │   ┌────────┴────────┐   │               │         *.devi.tools       │
+  │   ▼                 ▼   │               │       (URL pública,        │
+  │ [Pasta]       [Porta]   │               │        HTTPS automático)   │
   │   │                 │   │               │               │            │
-  │   ▼                 ▼   │               │               ▼            │
-  │ [Publicar]   [Conectar] │               │         *.devi.tools       │
-  │   │                 │   │               │       (URL pública,        │
-  │   ▼                 ▼   │               │        HTTPS automático)   │
-  │ pasta         localhost │               │               │            │
-  │ do site         :5500   │               │               │            │
-  │   │                 │   │               │               │            │
-  └───┼─────────────────┼───┘               └───────────────┼────────────┘
-      │                 │                                   │
-      │  zip via HTTPS  │   túnel WebSocket persistente     │
-      └─►───────────────┴──────►─────────────────────►──────┘
-          (uma vez)         (enquanto o lab              o amigo abre
-                             estiver aberto)              <slug>.devi.tools
+  │   ▼                 ▼   │               │               │            │
+  │ disco         localhost │               │               │            │
+  │ local           :5173   │               │               │            │
+  └───┴──────┬──────────┴───┘               └───────────────┼────────────┘
+             │                                              │
+             │              túnel WebSocket persistente     │
+             └──────►──────────────────────►────────────────┘
+                       (enquanto o lab              o amigo abre
+                        estiver aberto)              <slug>.devi.tools
                                                                 ▼
-                                                       ┌──────────────────┐
-                                                       │   amigo dela     │
-                                                       │     (chrome)     │
-                                                       └──────────────────┘
+                                                          chrome do amigo
 ```
 
-### Modo "Publicar pasta" (build estático)
+### Modo "Compartilhar pasta"
 
-1. Rodar o build do projeto: `npm run build` (Vite, React, Vue, etc.).
-2. Abrir `lab.exe`, aba **Publicar pasta**.
-3. Escolher a pasta `dist/` (ou `build/`).
-4. Opcional: digitar um nome amigável (ex: `meu-tcc`).
-5. Clicar **Publicar**.
-6. Copiar a URL que apareceu e mandar pro amigo.
+Pra HTML estático ou build pronto.
 
-A URL fica de pé pra sempre (até apagar). Funciona offline depois — o
-PC da filha pode tá desligado e o site continua no ar.
+1. Abrir o lab, marcar **"Uma pasta"**.
+2. Escolher a pasta com seu `index.html`.
+3. Clicar **Compartilhar**.
+4. Copiar a URL e mandar pro amigo.
 
-Exemplo de URL: `https://meu-tcc-h7k2nq.devi.tools`
+O lab serve os arquivos direto do disco via WebSocket. Editou, salvou, próxima request lê
+a versão nova. Sem dev server externo, sem WebStorm, sem `Allowed Hosts`.
 
-### Modo "Conectar porta" (dev server ao vivo)
+### Modo "Compartilhar porta"
 
-1. Rodar o dev server: `npm run dev` (Vite costuma usar porta `5173`).
-2. Abrir `lab.exe`, aba **Conectar porta**.
-3. Digitar a porta (ex: `5173`).
-4. Opcional: nome amigável.
-5. Clicar **Conectar**.
-6. Copiar a URL e mandar pro amigo.
+Pra dev server ao vivo (Vite, Next, Java, PHP, etc).
 
-A URL fica ativa **enquanto o lab.exe tiver aberto**. Fecha o app =
-URL cai. Bom pra mostrar mudança ao vivo (a tela do amigo atualiza
-junto com a sua quando você salva o código).
+1. Subir o servidor local: `npm run dev`, `php -S`, etc.
+2. No lab marcar **"Uma porta local"**.
+3. Digitar a porta (Vite 5173, Next 3000…).
+4. Clicar **Compartilhar**.
 
-Exemplo de URL: `https://live-3yes4h.devi.tools`
+HMR funciona — o amigo vê suas mudanças ao vivo.
 
-### Qual modo escolher
+### Vida útil
 
-|                                | Publicar pasta  | Conectar porta    |
-|--------------------------------|-----------------|-------------------|
-| Funciona depois de fechar o PC | ✅ sim          | ❌ não            |
-| Mostra mudanças ao vivo (HMR)  | ❌ não          | ✅ sim            |
-| Precisa rodar `npm run build`  | ✅ antes        | ❌ não            |
-| Funciona com backend Java/PHP  | ❌ só estático  | ✅ se tiver porta |
-| Bom pra entregar trabalho      | ✅              | ⚠️ instável        |
-| Bom pra demonstração rápida    | ⚠️ exige build  | ✅                |
+Em ambos os modos, a URL fica de pé **enquanto o lab tiver aberto**. Fecha = cai. Nada
+fica armazenado no servidor. Pra entregar trabalho que precisa sobreviver com o PC
+desligado, use GitHub Pages, Netlify ou Vercel.
 
-### Pegadinha importante: dev server precisa aceitar Host externo
+### Pegadinha do modo porta: dev server precisa aceitar Host externo
 
-O Vite (e quase todo dev server) rejeita conexões com Host diferente de
-`localhost` por padrão. Se ao abrir a URL aparecer "Blocked request",
-ajustar o `vite.config.js`:
+O Vite (e quase todo dev server) rejeita conexões com Host diferente de `localhost` por
+padrão. Se ao abrir a URL aparecer "Blocked request", ajustar o `vite.config.js`:
 
 ```js
 export default {
@@ -101,23 +83,22 @@ Outros: ver [client/README.md](client/README.md).
 
 ---
 
-## Componentes do projeto
+## Componentes
 
-- [`server/`](server/) — serviço Go (`lab`) que roda na VPS
-  `devi.tools`. Recebe uploads, mantém túneis WebSocket reversos,
-  roteia `<slug>.devi.tools` pro destino certo.
-- [`client/`](client/) — app Windows (Python + Tkinter empacotado em
-  `.exe`) com as duas abas. Build via `client/build.bat`.
-- [`docs/`](docs/) — landing pública em <https://lab.devi.tools>
-  (embutida no binário do server via `go:embed` no build).
+- [`server/`](server/) — serviço Go (`lab`) que roda na VPS `devi.tools`. Aceita conexões
+  WebSocket de clientes e roteia `<slug>.devi.tools` pro túnel certo.
+- [`client/`](client/) — app desktop (Python + Tkinter empacotado em `.exe` / `.app`) que
+  abre o túnel e serve a pasta ou proxya a porta local.
+- [`docs/`](docs/) — landing pública em <https://lab.devi.tools> (embutida no binário do
+  server via `go:embed` no build).
 
 ## Decisões de arquitetura
 
 | | |
 |---|---|
-| Subdomínio raiz | `*.devi.tools` (regex VIRTUAL_HOST, match exato vence pra subdomínios já cadastrados) |
+| Subdomínio raiz | `*.devi.tools` (regex `VIRTUAL_HOST`, match exato vence pra subdomínios já cadastrados) |
 | Cert | Wildcard `*.devi.tools` via certbot DNS-01 (DO API), renova semanal via cron |
 | Auth | Slug aleatório `<friendly>-<rand6>` ~30 bits (sem token) |
-| Storage estático | `/projects/lab.devi.tools/app/server/sites/<slug>/` |
-| GC estático | 30 dias sem acesso → registry remove |
-| Admin endpoint | `lab.devi.tools` (`/publish`, `/tunnel`, `/health`) |
+| Protocolo | Envelope JSON sobre WebSocket: req/resp com base64 body |
+| Estado no servidor | Só o map slug → conn WS na memória. Nada em disco, nada persiste |
+| Admin endpoint | `lab.devi.tools` (`/tunnel`, `/health`) |

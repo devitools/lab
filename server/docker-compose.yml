@@ -9,12 +9,9 @@ services:
     restart: unless-stopped
     networks:
       - reverse-proxy
-    volumes:
-      - ./sites:/srv/sites
     environment:
       - LAB_ROOT_DOMAIN=devi.tools
       - LAB_ADMIN_HOST=lab.devi.tools
-      - LAB_SITES_DIR=/srv/sites
       - LAB_LISTEN=:8080
       - VIRTUAL_HOST=~^[a-z0-9-]+\.devi\.tools$$
       - VIRTUAL_PORT=8080

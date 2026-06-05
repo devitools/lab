@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>lab.devi.tools — URL pública pro seu projeto local</title>
-<meta name="description" content="Túnel reverso e publicação estática caseira pra *.devi.tools. Sem SSH, sem ngrok, sem configuração.">
+<meta name="description" content="Túnel reverso caseiro pra *.devi.tools. Sem SSH, sem ngrok, sem configuração.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -235,8 +235,8 @@
     color: white;
   }
   .mode-card .mode-icon svg { width: 22px; height: 22px; }
-  .mode-card.publish .mode-icon { background: linear-gradient(135deg, #60a5fa, #2563eb); box-shadow: 0 8px 20px -8px rgba(96, 165, 250, 0.5); }
-  .mode-card.tunnel .mode-icon  { background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 8px 20px -8px rgba(251, 191, 36, 0.5); }
+  .mode-card.folder .mode-icon { background: linear-gradient(135deg, #60a5fa, #2563eb); box-shadow: 0 8px 20px -8px rgba(96, 165, 250, 0.5); }
+  .mode-card.port .mode-icon   { background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 8px 20px -8px rgba(251, 191, 36, 0.5); }
   .mode-card h3 {
     font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.4px;
   }
@@ -280,36 +280,6 @@
   pre code {
     background: none; border: none; padding: 0; color: inherit; font-size: inherit;
   }
-
-  .comparison-wrap {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 8px;
-    overflow: hidden;
-    max-width: 800px; margin: 0 auto;
-  }
-  table.cmp {
-    width: 100%; border-collapse: collapse;
-    font-size: 14.5px;
-  }
-  .cmp th, .cmp td {
-    padding: 14px 18px;
-    text-align: left;
-  }
-  .cmp thead th {
-    color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
-    border-bottom: 1px solid var(--line);
-  }
-  .cmp tbody tr { border-bottom: 1px solid var(--line); }
-  .cmp tbody tr:last-child { border-bottom: none; }
-  .cmp td.label { color: #d1d5db; }
-  .cmp td.yes { color: var(--good); font-weight: 600; }
-  .cmp td.no  { color: var(--bad);  font-weight: 600; }
-  .cmp td.mid { color: var(--warn); font-weight: 600; }
-  .cmp td.yes::before { content: "✓ "; }
-  .cmp td.no::before  { content: "✗ "; }
-  .cmp td.mid::before { content: "△ "; }
 
   .pitfall {
     background: linear-gradient(135deg, rgba(251, 146, 60, 0.08), rgba(251, 146, 60, 0.02));
@@ -406,8 +376,8 @@
     </a>
     <nav class="nav-links">
       <a href="#como-usar">Como usar</a>
-      <a href="#qual-modo">Qual modo</a>
       <a href="#pegadinhas">Pegadinhas</a>
+      <a href="#arquitetura">Arquitetura</a>
       <a href="#download">Download</a>
     </nav>
     <div class="nav-actions">
@@ -430,7 +400,7 @@
     </span>
     <h1 class="hero-title">URL pública pro seu projeto local em 1 clique</h1>
     <p class="hero-sub">
-      Abra o <strong style="color: var(--text);">lab</strong> no seu computador, aponte uma pasta
+      Abra o <strong style="color: var(--text);">lab</strong> no seu computador, escolha uma pasta
       ou uma porta, e receba um link HTTPS pra mandar pro amigo. Sem SSH, sem ngrok, sem cadastro.
     </p>
     <div class="hero-cta" id="download">
@@ -456,7 +426,7 @@
         <div class="feat-icon purple">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         </div>
-        <h3>Dois cliques</h3>
+        <h3>Um clique</h3>
         <p>Sem terminal, sem chave SSH, sem token de cadastro. Abriu, escolheu, clicou.</p>
       </div>
       <div class="feat">
@@ -480,134 +450,52 @@
 <section id="como-usar">
   <div class="wrap">
     <p class="section-eyebrow">Como usar</p>
-    <h2 class="section-title">Dois modos, mesma simplicidade</h2>
+    <h2 class="section-title">Dois jeitos de compartilhar</h2>
     <p class="section-sub">
-      Publicar uma pasta de build pronto, ou conectar uma porta local ao vivo.
+      Aponte uma pasta no disco, ou uma porta de dev server. O lab cuida do resto.
     </p>
 
     <div class="modes">
-      <div class="mode-card publish">
+      <div class="mode-card folder">
         <div class="mode-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <h3>Publicar pasta</h3>
-        <p class="mode-tag">Build estático · URL permanente</p>
+        <h3>Compartilhar pasta</h3>
+        <p class="mode-tag">Pra HTML estático ou build pronto</p>
         <ol>
-          <li>Abrir o lab</li>
-          <li>Escolher a pasta do projeto (com <code>index.html</code> dentro)</li>
-          <li>Clicar <strong>Publicar</strong></li>
+          <li>Abrir o lab e marcar <strong>"Uma pasta"</strong></li>
+          <li>Escolher a pasta com seu <code>index.html</code></li>
+          <li>Clicar <strong>Compartilhar</strong></li>
           <li>Copiar a URL e mandar pro amigo</li>
         </ol>
         <div class="card-footer">
-          Funciona <strong>pra sempre</strong> (até apagar). Seu computador pode tá desligado que continua no ar.
+          Você salva um arquivo, a próxima request já lê a versão nova. Nada de WebStorm,
+          nada de <code>Allowed Hosts</code>.
         </div>
       </div>
 
-      <div class="mode-card tunnel">
+      <div class="mode-card port">
         <div class="mode-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         </div>
-        <h3>Conectar porta</h3>
-        <p class="mode-tag">Dev server ao vivo · URL temporária</p>
+        <h3>Compartilhar porta</h3>
+        <p class="mode-tag">Pra dev server (Vite, Next, Java, PHP…)</p>
         <ol>
-          <li>Subir um servidor local. Três opções:
-            <ul>
-              <li><strong>WebStorm</strong> built-in (porta <code>63342</code>) — habilitar em <em>Settings → Build → Debugger</em> → "Can accept external connections"</li>
-              <li><strong>VSCode</strong> extensão Live Server (porta <code>5500</code>)</li>
-              <li><strong>Python</strong> <code>python -m http.server 5500</code></li>
-            </ul>
-          </li>
-          <li>Abrir o lab e digitar a porta</li>
-          <li>Clicar <strong>Conectar</strong></li>
-          <li>Copiar a URL e mandar pro amigo</li>
+          <li>Subir o servidor local: <code>npm run dev</code> ou similar</li>
+          <li>No lab marcar <strong>"Uma porta local"</strong></li>
+          <li>Digitar a porta (Vite 5173, Next 3000…)</li>
+          <li>Clicar <strong>Compartilhar</strong></li>
         </ol>
         <div class="card-footer">
-          Funciona <strong>enquanto o lab tiver aberto</strong>. Fechou = caiu. Mas mostra mudanças ao vivo.
+          HMR funciona — o amigo vê suas mudanças ao vivo no navegador dele.
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section id="qual-modo">
-  <div class="wrap">
-    <p class="section-eyebrow">Comparação</p>
-    <h2 class="section-title">Qual modo escolher?</h2>
-    <p class="section-sub">Depende se você quer um link que sobreviva ou que mostre mudanças ao vivo.</p>
-
-    <div class="comparison-wrap">
-      <table class="cmp">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Publicar pasta</th>
-            <th>Conectar porta</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="label">Funciona com o computador desligado</td>
-            <td class="yes">sim</td>
-            <td class="no">não</td>
-          </tr>
-          <tr>
-            <td class="label">Mostra mudanças ao vivo</td>
-            <td class="no">não</td>
-            <td class="yes">sim</td>
-          </tr>
-          <tr>
-            <td class="label">Bom pra entregar trabalho</td>
-            <td class="yes">muito</td>
-            <td class="mid">instável</td>
-          </tr>
-          <tr>
-            <td class="label">Bom pra demo rápida</td>
-            <td class="yes">muito</td>
-            <td class="yes">muito</td>
-          </tr>
-          <tr>
-            <td class="label">Funciona com backend (Java, PHP…)</td>
-            <td class="no">só estático</td>
-            <td class="yes">se tem porta</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="narrow">
-    <p class="section-eyebrow">Projeto com build</p>
-    <h2 class="section-title">Vite, React, Vue, Next…</h2>
-    <p class="section-sub">Mesma coisa, só que com um passo extra de <code>npm</code>.</p>
-
-    <div class="modes">
-      <div class="mode-card publish">
-        <div class="mode-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        </div>
-        <h3>Publicar + build</h3>
-        <p class="mode-tag">Pra entregar trabalho</p>
-        <ol>
-          <li>Rodar <code>npm run build</code></li>
-          <li>No lab, escolher a pasta <code>dist/</code> (ou <code>build/</code>)</li>
-          <li>Publicar normal</li>
-        </ol>
-      </div>
-      <div class="mode-card tunnel">
-        <div class="mode-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <h3>Conectar dev server</h3>
-        <p class="mode-tag">Pra mostrar mudanças ao vivo</p>
-        <ol>
-          <li>Rodar <code>npm run dev</code></li>
-          <li>Porta: Vite <code>5173</code>, CRA <code>3000</code>, Next <code>3000</code></li>
-          <li>No lab, digitar essa porta e Conectar</li>
-        </ol>
-      </div>
-    </div>
+    <p style="text-align: center; color: var(--muted); margin-top: 32px; font-size: 14px;">
+      Os dois modos têm <strong style="color: var(--text);">a mesma vida útil</strong>:
+      a URL fica de pé enquanto o lab tiver aberto. Fechou o app → caiu.
+    </p>
   </div>
 </section>
 
@@ -618,8 +506,8 @@
 
     <div class="pitfalls-list">
       <div class="pitfall">
-        <strong>"Blocked request. This host is not allowed."</strong><br>
-        Vite e similares rejeitam Host externo por padrão. Ajustar o <code>vite.config.js</code>:
+        <strong>Modo porta: "Blocked request. This host is not allowed."</strong><br>
+        Vite, Next e similares rejeitam Host externo por padrão. No <code>vite.config.js</code>:
       </div>
 
 <pre><code>export default {
@@ -637,21 +525,27 @@
       </p>
 
       <div class="pitfall" style="margin-top: 28px;">
-        <strong>WebStorm coloca o nome do projeto no caminho</strong><br>
-        Ex.: <code>localhost:63342/meu-site/index.html</code> vira
-        <code>&lt;slug&gt;.devi.tools/meu-site/</code>. Se quer URL na raiz,
-        prefira <code>python -m http.server</code>.
+        <strong>Pra HTML puro, prefira o modo pasta</strong><br>
+        Não precisa de WebStorm built-in, VSCode Live Server nem
+        <code>python -m http.server</code>. O lab serve direto do disco.
+      </div>
+
+      <div class="pitfall" style="margin-top: 28px;">
+        <strong>Fechou o lab = URL cai</strong><br>
+        Pra entregar trabalho que precisa sobreviver com seu PC desligado,
+        use GitHub Pages, Netlify ou Vercel. O lab é pra demo ao vivo.
       </div>
     </div>
   </div>
 </section>
 
-<section>
+<section id="arquitetura">
   <div class="wrap">
     <p class="section-eyebrow">Arquitetura</p>
     <h2 class="section-title">O caminho da request</h2>
     <p class="section-sub">
-      Modo publicar manda o zip uma vez; modo conectar abre WebSocket persistente.
+      Em ambos os modos o lab abre um WebSocket persistente com o servidor.
+      Cada request do amigo é encapsulada num envelope e roteada pelo túnel.
     </p>
 
     <div class="diagram-wrap">
@@ -662,21 +556,21 @@
   │    │      lab      │    │               │     │       lab        │   │
   │    └───────┬───────┘    │               │     └─────────┬────────┘   │
   │            │            │               │               │            │
-  │   ┌────────┴────────┐   │               │               │            │
-  │   │                 │   │               │               ▼            │
-  │   ▼                 ▼   │               │         *.devi.tools       │
-  │ [Publicar]   [Conectar] │               │       (URL pública,        │
-  │   │                 │   │               │        HTTPS automático)   │
-  │   ▼                 ▼   │               │               │            │
-  │ pasta         localhost │               │               │            │
-  │ do site         :5500   │               │               │            │
+  │   ┌────────┴────────┐   │               │               ▼            │
+  │   │                 │   │               │         *.devi.tools       │
+  │   ▼                 ▼   │               │       (URL pública,        │
+  │ [Pasta]       [Porta]   │               │        HTTPS automático)   │
   │   │                 │   │               │               │            │
-  └───┼─────────────────┼───┘               └───────────────┼────────────┘
-      │                 │                                   │
-      │  zip via HTTPS  │   túnel WebSocket persistente     │
-      └─►───────────────┴──────►─────────────────────►──────┘
-          (uma vez)         (enquanto o lab              o amigo abre
-                             estiver aberto)              &lt;slug&gt;.devi.tools
+  │   ▼                 ▼   │               │               │            │
+  │ disco         localhost │               │               │            │
+  │ local           :5173   │               │               │            │
+  │   │                 │   │               │               │            │
+  └───┴──────┬──────────┴───┘               └───────────────┼────────────┘
+             │                                              │
+             │              túnel WebSocket persistente     │
+             └──────►──────────────────────►────────────────┘
+                       (enquanto o lab              o amigo abre
+                        estiver aberto)              &lt;slug&gt;.devi.tools
                                                                 ▼
                                                        ┌──────────────────┐
                                                        │   amigo dela     │
@@ -697,7 +591,7 @@
       <span class="scheme">https://</span><span class="slug">meu-tcc-h7k2nq</span><span class="dom">.devi.tools</span>
     </div>
     <p class="url-caption">
-      Slugs estáticos sem acesso por 30 dias são apagados automaticamente.
+      A URL existe só enquanto o lab tiver aberto. Fechou, caiu — nada fica armazenado no servidor.
     </p>
   </div>
 </section>
@@ -713,7 +607,7 @@
             <span class="bot">devi tools</span>
           </span>
         </a>
-        <p>Túnel reverso e publicação estática caseira pra <code>*.devi.tools</code>.</p>
+        <p>Túnel reverso caseiro pra <code>*.devi.tools</code>.</p>
       </div>
       <div class="footer-col">
         <h4>Download</h4>

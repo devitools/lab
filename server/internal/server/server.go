@@ -7,9 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/devitools/lab/server/internal/publish"
 	"github.com/devitools/lab/server/internal/registry"
-	"github.com/devitools/lab/server/internal/static"
 	"github.com/devitools/lab/server/internal/tunnel"
 )
 
@@ -26,20 +24,17 @@ type Config struct {
 	Listen        string
 	RootDomain    string
 	AdminHost     string
-	SitesDir      string
-	MaxUploadMB   int64
 	TunnelTimeout time.Duration
 }
 
 type Server struct {
-	cfg     Config
-	reg     *registry.Registry
-	publish *publish.Handler
-	tunnel  *tunnel.Handler
+	cfg    Config
+	reg    *registry.Registry
+	tunnel *tunnel.Handler
 }
 
-func New(cfg Config, reg *registry.Registry, pub *publish.Handler, tun *tunnel.Handler) *Server {
-	return &Server{cfg: cfg, reg: reg, publish: pub, tunnel: tun}
+func New(cfg Config, reg *registry.Registry, tun *tunnel.Handler) *Server {
+	return &Server{cfg: cfg, reg: reg, tunnel: tun}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -71,16 +66,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeMissingLab(w, slug, s.cfg.RootDomain)
 		return
 	}
-	entry.Touch()
-
-	switch entry.Mode {
-	case registry.ModeStatic:
-		static.Serve(w, r, entry.Dir)
-	case registry.ModeTunnel:
-		s.tunnel.Forward(w, r, entry)
-	default:
-		http.Error(w, "invalid entry", http.StatusInternalServerError)
-	}
+	s.tunnel.Forward(w, r, entry)
 }
 
 func (s *Server) serveAdmin(w http.ResponseWriter, r *http.Request) {
@@ -88,12 +74,6 @@ func (s *Server) serveAdmin(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/health":
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
-	case r.URL.Path == "/publish/" || r.URL.Path == "/publish":
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		s.publish.Handle(w, r, s.cfg.RootDomain)
 	case r.URL.Path == "/tunnel/" || r.URL.Path == "/tunnel":
 		s.tunnel.Accept(w, r, s.cfg.RootDomain)
 	case r.URL.Path == "/":
@@ -134,7 +114,7 @@ func writeMissingLab(w http.ResponseWriter, slug, root string) {
 	fmt.Fprintf(w, `<!doctype html><meta charset=utf-8><title>lab não encontrado</title>
 <style>body{font-family:system-ui;max-width:520px;margin:80px auto;padding:0 24px;color:#222}
 h1{font-size:24px;margin:0 0 8px}code{background:#f3f3f3;padding:2px 6px;border-radius:4px}</style>
-<h1>lab não encontrado 🐾</h1>
+<h1>lab não encontrado</h1>
 <p>O lab <code>%s.%s</code> não está no ar agora.</p>
-<p>Ele pode ter expirado, sido apagado, ou nunca ter existido.</p>`, slug, root)
+<p>Túneis só funcionam enquanto o app lab estiver aberto no computador de quem compartilhou.</p>`, slug, root)
 }
