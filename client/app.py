@@ -13,12 +13,12 @@ APP_TITLE = "lab"
 PAD = 14
 
 STATES = {
-    "off":          ("Pronto",         "#888"),
-    "idle":         ("Pronto",         "#888"),
-    "connecting":   ("Conectando…",    "#e8a500"),
-    "up":           ("No ar",          "#1aa051"),
-    "reconnecting": ("Reconectando…",  "#d97506"),
-    "error":        ("Erro",           "#cc3333"),
+    "off":          ("",                "#888"),
+    "idle":         ("",                "#888"),
+    "connecting":   ("Conectando…",     "#e8a500"),
+    "up":           ("No ar",           "#1aa051"),
+    "reconnecting": ("Reconectando…",   "#d97506"),
+    "error":        ("Erro",            "#cc3333"),
 }
 
 
@@ -81,38 +81,43 @@ class App:
         self.friendly_entry.grid(row=5, column=0, sticky="ew")
         self._lockable.append(self.friendly_entry)
 
-        ttk.Separator(outer, orient="horizontal").grid(row=6, column=0, sticky="ew", pady=14)
+        self.result_sep = ttk.Separator(outer, orient="horizontal")
+        self.result_sep.grid(row=6, column=0, sticky="ew", pady=14)
 
-        # ── Result block (URL + status) ──────────────────────────────────
-        ttk.Label(outer, text="URL pública", foreground="#888").grid(row=7, column=0, sticky="w", pady=(0, 2))
+        # ── Result block (URL + status), hidden when idle ────────────────
+        self.result_frame = ttk.Frame(outer)
+        self.result_frame.grid(row=7, column=0, sticky="ew")
+        self.result_frame.columnconfigure(0, weight=1)
+
+        ttk.Label(self.result_frame, text="URL pública", foreground="#888").grid(row=0, column=0, sticky="w", pady=(0, 2))
 
         self.url_var = tk.StringVar()
-        url_row = ttk.Frame(outer)
-        url_row.grid(row=8, column=0, sticky="ew")
+        url_row = ttk.Frame(self.result_frame)
+        url_row.grid(row=1, column=0, sticky="ew")
         url_row.columnconfigure(0, weight=1)
         self.url_entry = ttk.Entry(url_row, textvariable=self.url_var, state="readonly")
         self.url_entry.grid(row=0, column=0, sticky="ew")
         ttk.Button(url_row, text="Copiar", command=self.copy_url, width=8).grid(row=0, column=1, padx=(6, 0))
         ttk.Button(url_row, text="Abrir", command=self.open_url, width=8).grid(row=0, column=2, padx=(6, 0))
 
-        status_row = ttk.Frame(outer)
-        status_row.grid(row=9, column=0, sticky="ew", pady=(6, 12))
+        status_row = ttk.Frame(self.result_frame)
+        status_row.grid(row=2, column=0, sticky="ew", pady=(6, 12))
         status_row.columnconfigure(1, weight=1)
         self.status_dot = tk.Canvas(status_row, width=12, height=12, highlightthickness=0)
         self.status_dot.grid(row=0, column=0, padx=(0, 6))
-        self.status_label = ttk.Label(status_row, text="Pronto", foreground="#888")
+        self.status_label = ttk.Label(status_row, text="", foreground="#888")
         self.status_label.grid(row=0, column=1, sticky="w")
         self._draw_dot("#888")
 
         # ── Action button (bottom) ───────────────────────────────────────
         self.action_btn = ttk.Button(outer, text="Compartilhar", command=self.toggle)
-        self.action_btn.grid(row=10, column=0, sticky="ew", ipady=4)
+        self.action_btn.grid(row=8, column=0, sticky="ew", ipady=4)
 
         self.error_var = tk.StringVar()
         ttk.Label(
             outer, textvariable=self.error_var,
             foreground="#cc3333", wraplength=480,
-        ).grid(row=11, column=0, sticky="ew", pady=(8, 0))
+        ).grid(row=9, column=0, sticky="ew", pady=(8, 0))
 
         # Footer
         ttk.Label(
@@ -121,6 +126,7 @@ class App:
         ).pack(side="bottom", pady=(0, 6))
 
         self._on_mode_change()
+        self._show_result(False)
         root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.after(80, self._drain_events)
 
@@ -138,6 +144,14 @@ class App:
         self.url_var.set("")
         self.error_var.set("")
         self.set_state("idle")
+
+    def _show_result(self, visible: bool):
+        if visible:
+            self.result_sep.grid()
+            self.result_frame.grid()
+        else:
+            self.result_sep.grid_remove()
+            self.result_frame.grid_remove()
 
     # ── Connect / disconnect ─────────────────────────────────────────────
     def toggle(self):
@@ -168,6 +182,7 @@ class App:
         friendly = self.friendly_var.get().strip() or None
         self.url_var.set("")
         self.error_var.set("")
+        self._show_result(True)
         self.set_state("connecting")
         self.action_btn.config(text="Parar")
         self._lock_inputs(True)
@@ -180,10 +195,10 @@ class App:
                 mode, target, friendly, emit, index_file=index_file,
             )
         except ValueError as e:
-            self.set_state("error")
             self.error_var.set(str(e))
             self.action_btn.config(text="Compartilhar")
             self._lock_inputs(False)
+            self._show_result(False)
             return
 
         self.tunnel_thread = threading.Thread(target=self.tunnel_client.start, daemon=True)
@@ -253,6 +268,7 @@ class App:
                 self.url_var.set("")
                 self.action_btn.config(text="Compartilhar")
                 self._lock_inputs(False)
+                self._show_result(False)
         elif kind == "error":
             msg = payload.get("message", "")
             self.error_var.set(f"último erro: {msg}")
