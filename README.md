@@ -3,7 +3,7 @@
 Túnel reverso caseiro pra `*.devi.tools`. Compartilhar projetos locais em URL pública sem ngrok, sem SSH, sem cadastro.
 
 - **Documentação amigável**: <https://lab.devi.tools>
-- **Download** — [Windows](https://github.com/devitools/lab/releases/download/latest/lab.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/lab-macos.zip)
+- **Download** — [Windows](https://github.com/devitools/lab/releases/download/latest/lab.exe) · [macOS](https://github.com/devitools/lab/releases/download/latest/lab-macos.zip) · [Linux (AppImage)](https://github.com/devitools/lab/releases/download/latest/lab-linux.AppImage)
 
 ## Como funciona
 
